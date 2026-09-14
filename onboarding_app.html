@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Onboarding & Review System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { primary: '#4F46E5', secondary: '#10B981' }
+                }
+            }
+        }
+    </script>
+    <style>
+        .progress-bar-animated { transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
+        body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        
+        /* Custom Scrollbar for inner elements */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .sidebar-transition { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .canvas-transition { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex">
+
+    <!-- Sidebar / Drawer -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 text-white transform -translate-x-full sidebar-transition shadow-2xl flex flex-col">
+        <div class="h-16 flex items-center px-6 border-b border-slate-800 gap-3">
+            <div class="bg-indigo-500 text-white p-1.5 rounded-lg">
+                <i class="fa-solid fa-users-gear text-sm"></i>
+            </div>
+            <span class="font-bold text-lg tracking-tight">HR Onboarding</span>
+        </div>
+        <div class="py-6 px-4 flex-grow flex flex-col gap-2">
+            <p class="px-2 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Menu Utama</p>
+            <button onclick="switchView('dashboard')" id="menu-btn-dashboard" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors bg-indigo-600 text-white">
+                <i class="fa-solid fa-gauge-high w-5 text-center"></i> Monitoring Onboarding
+            </button>
+            <button onclick="switchView('calendar')" id="menu-btn-calendar" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
+                <i class="fa-solid fa-calendar-days w-5 text-center"></i> Tanggal Review
+            </button>
+            <button onclick="switchView('admin')" id="menu-btn-admin" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
+                <i class="fa-solid fa-gear w-5 text-center"></i> Pengaturan Admin
+            </button>
+        </div>
+        <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
+            v2.0 &copy; 2026 HR Dept
+        </div>
+    </aside>
+
+    <!-- Overlay for sidebar on mobile -->
+    <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-30 hidden opacity-0 transition-opacity"></div>
+
+    <!-- Main Content Wrapper -->
+    <div class="flex-grow flex flex-col min-h-screen w-full transition-all duration-300">
+        
+        <!-- Top Navbar -->
+        <nav class="bg-white border-b border-gray-200 sticky top-0 z-20 shadow-sm">
+            <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16 items-center">
+                    <div class="flex items-center gap-4">
+                        <button onclick="toggleSidebar()" class="text-gray-500 hover:text-indigo-600 focus:outline-none p-2 rounded-lg hover:bg-slate-100 transition-colors">
+                            <i class="fa-solid fa-bars text-xl"></i>
+                        </button>
+                        <h1 id="topbar-title" class="font-bold text-lg text-gray-900 hidden sm:block">Monitoring Onboarding</h1>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <button class="text-gray-500 hover:text-gray-700 transition-colors relative">
+                            <i class="fa-solid fa-bell"></i>
+                            <span class="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
+                        </button>
+                        <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center border border-indigo-200">
+                            <span class="text-indigo-700 font-bold text-sm">HR</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- View: Dashboard -->
+        <main id="dashboard-view" class="flex-grow max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full block">
+            <div class="mb-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Daftar Karyawan</h2>
+                    <p class="text-sm text-gray-500 mt-1">Kelola progres administratif dan review karyawan baru.</p>
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-4">
+                    <div class="bg-white px-4 py-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4 min-w-[180px]">
+                        <div class="bg-blue-50 text-blue-600 p-2.5 rounded-lg"><i class="fa-solid fa-users text-lg"></i></div>
+                        <div>
+                            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Total Data</p>
+                            <p class="text-xl font-bold text-gray-900" id="total-onboarding">0</p>
+                        </div>
+                    </div>
+                    <div class="bg-white px-4 py-3 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-center min-w-[200px]">
+                        <div class="flex justify-between items-end mb-2">
+                            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Rata-rata Progress</p>
+                            <p class="text-lg font-bold text-indigo-600 leading-none" id="avg-progress">0%</p>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-1.5">
+                            <div class="bg-indigo-500 h-1.5 rounded-full progress-bar-animated" style="width: 0%" id="avg-progress-bar"></div>
+                        </div>
+                    </div>
+                    <button onclick="openAddEmployeeModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-xl text-sm font-medium transition-colors shadow-sm flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Tambah Karyawan
+                    </button>
+                </div>
+            </div>
+
+            <div class="mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-wrap gap-4 items-end">
+                <div class="flex-grow min-w-[200px]">
+                    <label class="block text-xs font-bold text-gray-700 mb-1.5">Cari Karyawan</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="text" id="filter-name" onkeyup="renderTable()" placeholder="Ketik nama..." class="w-full text-sm rounded-lg border border-gray-300 pl-9 pr-3 py-2 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+                <div class="flex-grow min-w-[150px]">
+                    <label class="block text-xs font-bold text-gray-700 mb-1.5">Posisi</label>
+                    <select id="filter-role" onchange="renderTable()" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="">Semua Posisi</option>
+                        <!-- Diisi otomatis oleh JS -->
+                    </select>
+                </div>
+                <div class="flex-grow min-w-[150px]">
+                    <label class="block text-xs font-bold text-gray-700 mb-1.5">Departemen</label>
+                    <select id="filter-dept" onchange="renderTable()" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="">Semua Departemen</option>
+                        <!-- Diisi otomatis oleh JS -->
+                    </select>
+                </div>
+                <div class="flex-grow min-w-[150px]">
+                    <label class="block text-xs font-bold text-gray-700 mb-1.5">Entitas</label>
+                    <select id="filter-entity" onchange="renderTable()" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="">Semua Entitas</option>
+                        <option value="PT Alpha Jaya">PT Alpha Jaya</option>
+                        <option value="PT Beta Teknologi">PT Beta Teknologi</option>
+                        <option value="CV Gamma Sentosa">CV Gamma Sentosa</option>
+                    </select>
+                </div>
+                <div class="flex-grow min-w-[150px]">
+                    <label class="block text-xs font-bold text-gray-700 mb-1.5">Progress</label>
+                    <select id="filter-progress" onchange="renderTable()" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="">Semua Progress</option>
+                        <option value="0-25">0% - 25%</option>
+                        <option value="26-50">26% - 50%</option>
+                        <option value="51-75">51% - 75%</option>
+                        <option value="76-100">76% - 100%</option>
+                        <option value="terminated">Diberhentikan / Cancel</option>
+                    </select>
+                </div>
+                <div>
+                    <button onclick="resetFilters()" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-sm h-[38px] flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i> Reset
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[1000px]">
+                        <thead>
+                            <tr class="bg-slate-50/80 border-b border-gray-200 text-xs uppercase tracking-wider text-gray-500">
+                                <th class="p-4 font-semibold w-[25%]">Nama Karyawan</th>
+                                <th class="p-4 font-semibold w-[20%]">Posisi & Dept</th>
+                                <th class="p-4 font-semibold w-[15%]">Entitas</th>
+                                <th class="p-4 font-semibold w-[15%]">Tgl Masuk</th>
+                                <th class="p-4 font-semibold w-[15%]">Progress</th>
+                                <th class="p-4 font-semibold w-[10%] text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employee-table-body" class="divide-y divide-gray-100">
+                            <!-- Data Karyawan -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+
+        <!-- View: Calendar / Reminder -->
+        <main id="calendar-view" class="flex-grow max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full hidden">
+            <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Kalender Review Kinerja</h2>
+                    <p class="text-sm text-gray-500 mt-1">Jadwal review bulanan karyawan dalam tampilan kalender.</p>
+                </div>
+                <div class="flex items-center gap-4 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm">
+                    <button onclick="changeCalMonth(-1)" class="text-gray-500 hover:text-indigo-600 p-2 rounded-lg hover:bg-slate-50 transition-colors"><i class="fa-solid fa-chevron-left"></i></button>
+                    <h3 id="calendar-month-year" class="font-bold text-gray-800 min-w-[130px] text-center text-sm uppercase tracking-wide">Bulan Tahun</h3>
+                    <button onclick="changeCalMonth(1)" class="text-gray-500 hover:text-indigo-600 p-2 rounded-lg hover:bg-slate-50 transition-colors"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <!-- Calendar Header (Days) -->
+                <div class="grid grid-cols-7 bg-slate-50/80 border-b border-gray-200">
+                    <div class="p-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Sen</div>
+                    <div class="p-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Sel</div>
+                    <div class="p-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Rab</div>
+                    <div class="p-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Kam</div>
+                    <div class="p-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Jum</div>
+                    <div class="p-3 text-center text-xs font-bold text-indigo-500 uppercase tracking-wider">Sab</div>
+                    <div class="p-3 text-center text-xs font-bold text-red-500 uppercase tracking-wider">Min</div>
+                </div>
+                <!-- Calendar Grid (Dates & Events) -->
+                <div id="calendar-grid" class="grid grid-cols-7 auto-rows-[minmax(120px,auto)]">
+                    <!-- Hari-hari akan dirender oleh JS -->
+                </div>
+            </div>
+        </main>
+
+        <!-- View: Admin / Pengaturan -->
+        <main id="admin-view" class="flex-grow max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full hidden">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">Pengaturan Administratif</h2>
+                <p class="text-sm text-gray-500 mt-1">Kelola data master dan pengaturan sistem onboarding.</p>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="flex gap-6 mb-8 border-b border-gray-200">
+                <button onclick="switchAdminTab('template')" id="tab-btn-template" class="pb-3 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 transition-colors">Item Administratif</button>
+                <button onclick="switchAdminTab('master')" id="tab-btn-master" class="pb-3 text-sm font-bold text-gray-500 border-b-2 border-transparent hover:text-gray-700 transition-colors">Role, Divisi & Entitas</button>
+            </div>
+
+            <!-- TAB 1: Template Administratif -->
+            <div id="admin-tab-template" class="block">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    
+                    <!-- Kolom Kiri: Form Tambah / Edit -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sticky top-24">
+                            <h3 id="form-admin-title" class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Tambah Item Baru</h3>
+                            <form id="form-add-template" onsubmit="saveNewAdminTemplate(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">Nama Item</label>
+                                    <input type="text" id="tmpl-label" required class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Contoh: Pembuatan Akun Email">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">Instruksi Kerja</label>
+                                    <textarea id="tmpl-inst" required rows="3" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none resize-none" placeholder="Pisahkan dengan enter (baris baru)..."></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">Policy / Kebijakan</label>
+                                    <textarea id="tmpl-pol" required rows="3" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none resize-none" placeholder="Pisahkan dengan enter (baris baru)..."></textarea>
+                                </div>
+                                <div class="pt-4 border-t border-gray-100 flex gap-3">
+                                    <button type="button" id="btn-cancel-edit" onclick="cancelEditTemplate()" class="hidden w-1/3 px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Batal</button>
+                                    <button type="submit" id="btn-submit-template" class="w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 flex items-center justify-center gap-2 transition-colors shadow-sm">
+                                        <i id="icon-submit-template" class="fa-solid fa-plus"></i> <span id="text-submit-template">Tambah Item</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Kolom Kanan: List Template -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                            <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Daftar Item Administratif Saat Ini</h3>
+                            <div id="admin-template-list" class="space-y-4">
+                                <!-- Rendered by JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- TAB 2: Master Data (Role, Divisi, Entitas) -->
+            <div id="admin-tab-master" class="hidden">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Master Posisi -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Master Posisi (Role)</h3>
+                        <form onsubmit="addMasterRole(event)" class="flex gap-3 mb-4">
+                            <input type="text" id="input-master-role" required class="flex-grow text-sm rounded-lg border border-gray-300 px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Posisi baru...">
+                            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium transition-colors shadow-sm"><i class="fa-solid fa-plus"></i></button>
+                        </form>
+                        <div id="list-master-role" class="space-y-2 max-h-[300px] overflow-y-auto pr-2"></div>
+                    </div>
+
+                    <!-- Master Departemen -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Master Departemen</h3>
+                        <form onsubmit="addMasterDept(event)" class="flex gap-3 mb-4">
+                            <input type="text" id="input-master-dept" required class="flex-grow text-sm rounded-lg border border-gray-300 px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Dept baru...">
+                            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium transition-colors shadow-sm"><i class="fa-solid fa-plus"></i></button>
+                        </form>
+                        <div id="list-master-dept" class="space-y-2 max-h-[300px] overflow-y-auto pr-2"></div>
+                    </div>
+
+                    <!-- Master Entitas -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Master Entitas</h3>
+                        <form onsubmit="addMasterEntity(event)" class="flex gap-3 mb-4">
+                            <input type="text" id="input-master-entity" required class="flex-grow text-sm rounded-lg border border-gray-300 px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Entitas baru...">
+                            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium transition-colors shadow-sm"><i class="fa-solid fa-plus"></i></button>
+                        </form>
+                        <div id="list-master-entity" class="space-y-2 max-h-[300px] overflow-y-auto pr-2"></div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+    </div> <!-- End Main Content -->
+
+    <!-- Modal: Detail Karyawan (Latar Belakang) -->
+    <div id="detail-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 lg:p-8 bg-slate-900/60 backdrop-blur-sm opacity-0 hidden transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-full max-h-[90vh] flex flex-col scale-95 transition-transform duration-300 overflow-hidden relative">
+            
+            <!-- Header Modal -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white shrink-0">
+                <div class="flex items-center gap-4">
+                    <img id="modal-avatar" src="" alt="Avatar" class="w-12 h-12 rounded-full bg-slate-100 object-cover border border-slate-200 shadow-sm">
+                    <div>
+                        <h2 id="modal-name" class="text-xl font-bold text-gray-900 leading-tight">Nama</h2>
+                        <p id="modal-role-entity" class="text-sm text-gray-500">Role | Dept &bull; Entitas</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-6">
+                    <button id="btn-terminate" onclick="openTerminateModal()" class="text-xs font-bold text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-1.5 rounded-lg border border-red-200 transition-colors flex items-center gap-1.5 hidden">
+                        <i class="fa-solid fa-power-off"></i> Selesaikan
+                    </button>
+                    <div class="flex flex-col items-end">
+                        <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400">Total Progress</span>
+                        <span id="modal-progress-text" class="text-2xl font-black text-indigo-600 leading-none">0%</span>
+                    </div>
+                    <div class="h-10 border-l border-slate-200"></div>
+                    <button onclick="closeDetailModal()" class="text-slate-400 hover:text-slate-700 hover:bg-slate-100 p-2 rounded-full transition-colors">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Body Modal (Dua Kolom) -->
+            <div class="flex-grow overflow-y-auto bg-slate-50/50 p-6 relative">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Kolom Kiri: Administratif -->
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-folder-open text-indigo-500"></i> Kelengkapan Administratif
+                            </h3>
+                            <span class="text-xs font-medium bg-indigo-100 text-indigo-700 px-2 py-1 rounded">Klik item untuk detail</span>
+                        </div>
+                        <div id="admin-list" class="space-y-3">
+                            <!-- Items List Rendered by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Kolom Kanan: Review -->
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-clipboard-check text-emerald-500"></i> Review Kinerja
+                            </h3>
+                        </div>
+                        <div id="review-list" class="space-y-3">
+                            <!-- Items List Rendered by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- INNER CANVAS (DRAWER) UNTUK EDIT ITEM -->
+            <div id="item-canvas" class="absolute inset-y-0 right-0 w-full md:w-[450px] bg-white shadow-[-10px_0_30px_rgba(0,0,0,0.1)] border-l border-gray-200 transform translate-x-full canvas-transition flex flex-col z-20 hidden">
+                <!-- Canvas Header -->
+                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-slate-50 shrink-0">
+                    <div>
+                        <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-wider bg-indigo-100 px-2 py-0.5 rounded" id="canvas-type">Tipe</span>
+                        <h3 id="canvas-title" class="text-lg font-bold text-gray-900 mt-1">Judul Item</h3>
+                    </div>
+                    <button onclick="closeItemCanvas()" class="text-gray-400 hover:text-gray-700 bg-white hover:bg-gray-100 border border-gray-200 shadow-sm p-2 rounded-full transition-colors">
+                        <i class="fa-solid fa-chevron-right text-sm"></i>
+                    </button>
+                </div>
+
+                <!-- Canvas Body -->
+                <div class="flex-grow overflow-y-auto p-6 space-y-6">
+                    <!-- Instruksi & Policy -->
+                    <div class="bg-indigo-50/50 rounded-xl p-4 border border-indigo-100">
+                        <div class="mb-4">
+                            <h4 class="text-xs font-bold text-indigo-800 uppercase tracking-wider mb-2 flex items-center gap-1.5"><i class="fa-solid fa-list-check"></i> Instruksi Kerja</h4>
+                            <ul id="canvas-instructions" class="list-decimal list-outside text-sm text-slate-700 ml-4 marker:text-indigo-400 marker:font-semibold space-y-1"></ul>
+                        </div>
+                        <div class="border-t border-indigo-200/60 my-3"></div>
+                        <div>
+                            <h4 class="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-2 flex items-center gap-1.5"><i class="fa-solid fa-shield-halved"></i> Policy</h4>
+                            <ul id="canvas-policies" class="list-disc list-outside text-sm text-slate-700 ml-4 marker:text-emerald-500 space-y-1"></ul>
+                        </div>
+                    </div>
+
+                    <!-- Form Inputs -->
+                    <div class="space-y-4">
+                        <!-- Status -->
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1.5">Status Penyelesaian</label>
+                            <select id="input-status" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white shadow-sm font-medium">
+                                <option value="NONE">Belum Dimulai (None)</option>
+                                <option value="ON_PROGRESS">Dalam Proses (On Progress)</option>
+                                <option value="DONE">Selesai (Done)</option>
+                                <option value="CANCELLED">Dibatalkan (Cancelled)</option>
+                            </select>
+                        </div>
+
+                        <!-- Tanggal (Admin: 1 Tgl, Review: 2 Tgl) -->
+                        <div id="date-group-admin" class="hidden">
+                            <label class="block text-xs font-bold text-gray-700 mb-1.5">Tanggal Penyelesaian</label>
+                            <input type="date" id="input-date-single" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white shadow-sm">
+                        </div>
+
+                        <div id="date-group-review" class="grid grid-cols-2 gap-3 hidden">
+                            <div>
+                                <label class="block text-[11px] font-bold text-gray-700 mb-1.5">Jadwal Review</label>
+                                <input type="date" id="input-date-schedule" class="w-full text-sm rounded-lg border border-gray-300 px-2 py-2 focus:ring-2 focus:ring-indigo-500 shadow-sm">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-gray-700 mb-1.5">Aktual Review</label>
+                                <input type="date" id="input-date-actual" class="w-full text-sm rounded-lg border border-gray-300 px-2 py-2 focus:ring-2 focus:ring-emerald-500 shadow-sm">
+                            </div>
+                        </div>
+
+                        <!-- Catatan -->
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1.5">Catatan Tambahan</label>
+                            <textarea id="input-notes" rows="3" placeholder="Tambahkan catatan jika diperlukan..." class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white shadow-sm resize-none"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Canvas Footer -->
+                <div class="px-6 py-4 border-t border-gray-200 bg-white shrink-0 flex justify-end gap-3">
+                    <button onclick="closeItemCanvas()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm">Batal</button>
+                    <button onclick="saveItemDetail()" class="px-5 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm flex items-center gap-2">
+                        <i class="fa-solid fa-check"></i> Simpan
+                    </button>
+                </div>
+            </div>
+            <!-- END INNER CANVAS -->
+            
+        </div>
+    </div>
+
+    <!-- Modal: Tambah Karyawan -->
+    <div id="add-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm opacity-0 hidden transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg scale-95 transition-transform duration-300 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-slate-50">
+                <h3 class="text-lg font-bold text-gray-900">Tambah Karyawan Baru</h3>
+                <button onclick="closeAddModal()" class="text-gray-400 hover:text-gray-700"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="form-add-emp" onsubmit="submitNewEmployee(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Nama Lengkap</label>
+                    <input type="text" id="add-name" required class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Email / Kontak</label>
+                        <input type="text" id="add-email" required class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Email atau No. HP">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Tanggal Masuk</label>
+                        <input type="date" id="add-start" required class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Posisi (Role)</label>
+                        <select id="add-role" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <!-- Diisi otomatis oleh JS -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Departemen</label>
+                        <select id="add-dept" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <!-- Diisi otomatis oleh JS -->
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Entitas Perusahaan</label>
+                    <select id="add-entity" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <!-- Diisi otomatis oleh JS -->
+                    </select>
+                </div>
+                <div class="pt-4 border-t border-gray-100 flex justify-end gap-3">
+                    <button type="button" onclick="closeAddModal()" class="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">Batal</button>
+                    <button type="submit" class="px-5 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">Tambah Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Edit Karyawan Dasar -->
+    <div id="edit-emp-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm opacity-0 hidden transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg scale-95 transition-transform duration-300 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-slate-50">
+                <h3 class="text-lg font-bold text-gray-900">Edit Data Karyawan</h3>
+                <button onclick="closeEditEmployeeModal()" class="text-gray-400 hover:text-gray-700"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="form-edit-emp" onsubmit="submitEditEmployee(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Nama Lengkap</label>
+                    <input type="text" id="edit-name" required class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Email / Kontak</label>
+                        <input type="text" id="edit-email" required class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Email atau No. HP">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Tanggal Masuk</label>
+                        <input type="date" id="edit-start" required class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Posisi (Role)</label>
+                        <select id="edit-role" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <!-- Diisi otomatis oleh JS -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Departemen</label>
+                        <select id="edit-dept" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <!-- Diisi otomatis oleh JS -->
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Entitas Perusahaan</label>
+                    <select id="edit-entity" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <!-- Diisi otomatis oleh JS -->
+                    </select>
+                </div>
+                <div class="pt-4 border-t border-gray-100 flex justify-end gap-3">
+                    <button type="button" onclick="closeEditEmployeeModal()" class="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">Batal</button>
+                    <button type="submit" class="px-5 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Selesaikan Onboarding -->
+    <div id="terminate-modal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm opacity-0 hidden transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md scale-95 transition-transform duration-300 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 bg-red-50 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-triangle-exclamation text-red-500 text-xl"></i>
+                    <h3 class="text-lg font-bold text-red-700">Selesaikan Onboarding</h3>
+                </div>
+                <button onclick="closeTerminateModal()" class="text-red-400 hover:text-red-700 p-1 rounded-full"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="form-terminate" onsubmit="submitTerminate(event)" class="p-6 space-y-4">
+                <p class="text-xs text-gray-600 mb-2">Aksi ini akan menandai proses onboarding karyawan sebagai selesai (100%) dengan status pemberhentian/pembatalan.</p>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Alasan Selesai</label>
+                    <select id="term-reason" required class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-red-500 outline-none">
+                        <option value="" disabled selected>Pilih Alasan...</option>
+                        <option value="Tidak Lanjut OJT">Tidak Lanjut OJT</option>
+                        <option value="Tidak Lanjut Probation">Tidak Lanjut Probation</option>
+                        <option value="Diberhentikan OJT">Diberhentikan OJT</option>
+                        <option value="Diberhentikan Probation">Diberhentikan Probation</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Catatan Tambahan (Wajib)</label>
+                    <textarea id="term-notes" required rows="3" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-red-500 outline-none resize-none" placeholder="Masukkan detail alasan penyelesaian (Misal: Karyawan mengundurkan diri)..."></textarea>
+                </div>
+                <div class="pt-4 border-t border-gray-100 flex justify-end gap-3">
+                    <button type="button" onclick="closeTerminateModal()" class="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">Batal</button>
+                    <button type="submit" class="px-5 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">Konfirmasi Selesai</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notification" class="fixed bottom-6 right-6 max-w-sm bg-gray-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-start gap-3 transform translate-y-20 opacity-0 transition-all duration-300 z-[70] border border-gray-700">
+        <i class="fa-solid fa-circle-check text-green-400 mt-1"></i>
+        <div>
+            <p class="text-sm font-bold text-white">Notifikasi</p>
+            <p id="notification-text" class="text-xs text-gray-300 mt-0.5">Pesan</p>
+        </div>
+    </div>
+
+    <script>
+        // --- STREAMING_CHUNK:Initialize Data Structures ---
+        let adminChecklistTemplate = [
+            { 
+                id: 'data', 
+                label: 'Pengumpulan Data Diri', 
+                type: 'admin',
+                instructions: [
+                    "Minta Foto KK (Kirim Ke Nomor Recruitment)",
+                    `Minta Karyawan Mengisi Di Data Karyawan <button type="button" class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2 py-0.5 rounded transition-colors ml-1 shadow-sm" onclick="generateLink(event, 'Form Data Karyawan')"><i class="fa-solid fa-link"></i> Generate Link</button>`,
+                    "Pastikan Pengisian Data Karyawan Sesuai Standar HR",
+                    "Isi juga Data Karyawan di Sheet Data Karyawan (Untuk Data Kredo Tanggal Lahir / NIP)"
+                ],
+                policies: [
+                    "Setiap karyawan baru wajib mengisi Data Karyawan di Presensi, HR memastikan keabsahan data presensi tersebut.",
+                    "HR memastikan KK telah diupload di Google Drive",
+                    "Kelengkapan Data Diri di Presensi WAJIB diisi ketika karyawan pertama kali masuk (OJT maupun Probation)"
+                ]
+            },
+            { id: 'kontrak', label: 'Tanda Tangan Kontrak', type: 'admin', instructions: ["Siapkan draf kontrak sesuai posisi", "Jadwalkan sesi tanda tangan dengan karyawan", "Arsipkan kontrak fisik dan digital"], policies: ["Kontrak harus ditandatangani paling lambat hari pertama kerja", "Salinan kontrak wajib diberikan kepada karyawan"] },
+            { id: 'bast', label: 'BAST Fasilitas Kerja', type: 'admin', instructions: ["Siapkan form BAST", "Serahkan fasilitas (Laptop, dll)"], policies: ["Form BAST wajib ditandatangani kedua belah pihak"] },
+            { id: 'email', label: 'Pembuatan Akun Email', type: 'admin', instructions: ["Request ke IT untuk pembuatan email perusahaan"], policies: ["Format email: nama.depan@perusahaan.com"] },
+            { id: 'presensi', label: 'Akses Sistem Presensi', type: 'admin', instructions: ["Daftarkan sidik jari/wajah di mesin", "Berikan akses aplikasi HRIS"], policies: ["Wajib aktif di hari pertama kerja"] },
+            { id: 'cust_panel', label: 'Akses Customer Panel', type: 'admin', instructions: ["Request akses ke tim sistem untuk role terkait"], policies: ["Hanya untuk divisi Operasional dan Sales"] },
+            { id: 'materi', label: 'Pemberian Materi Onboarding', type: 'admin', instructions: ["Kirimkan PDF Company Profile & Peraturan Perusahaan"], policies: ["Wajib dibaca dan dipahami dalam minggu pertama"] },
+            { id: 'kredo', label: 'Sosialisasi Kredo/Budaya', type: 'admin', instructions: ["Jadwalkan sesi sosialisasi budaya kerja dengan HR"], policies: ["Merupakan bagian dari penilaian culture fit"] },
+            { id: 'seragam', label: 'Pengambilan Seragam', type: 'admin', instructions: ["Ukur ukuran baju", "Serahkan seragam jika stok tersedia"], policies: ["Diberikan setelah masa probation selesai atau sesuai kebijakan divisi"] },
+            { id: 'id_card', label: 'Pembuatan ID Card', type: 'admin', instructions: ["Minta pas foto terbaru", "Cetak ID Card"], policies: ["Wajib dipakai selama berada di area kantor"] },
+            { id: 'masuk_grup', label: 'Masuk Grup Komunikasi', type: 'admin', instructions: ["Masukkan nomor WA ke grup divisi dan grup general"], policies: ["Jaga etika komunikasi di dalam grup perusahaan"] }
+        ];
+
+        let baseReviewChecklistTemplate = [
+            { id: 'review1', label: 'Review Bulan 1', type: 'review', instructions: ["Jadwalkan meeting 1-on-1 dengan atasan langsung", "Siapkan form evaluasi bulan pertama"], policies: ["Fokus pada adaptasi lingkungan dan pemahaman tugas dasar"] },
+            { id: 'review2', label: 'Review Bulan 2', type: 'review', instructions: ["Jadwalkan meeting 1-on-1", "Kumpulkan feedback dari rekan tim"], policies: ["Fokus pada pencapaian target awal dan kemandirian"] },
+            { id: 'review3', label: 'Review Bulan 3 (Final)', type: 'review', instructions: ["Siapkan form evaluasi final probation", "Minta rekomendasi atasan (Lulus/Tidak)"], policies: ["Menentukan kelanjutan kontrak atau pengangkatan karyawan tetap"] }
+        ];
+
+        let employees = [
+            {
+                id: 1, name: "ADHIB", email: "adhib@perusahaan.com", avatar: "https://ui-avatars.com/api/?name=ADHIB&background=4F46E5&color=fff", 
+                role: "Staff", department: "Operasional", entity: "PT Alpha Jaya", startDate: "2025-01-10",
+                checklist: {
+                    data: { status: 'DONE', date: '2025-01-11', notes: '' },
+                    kontrak: { status: 'DONE', date: '2025-01-10', notes: '' },
+                    bast: { status: 'DONE', date: '2025-01-10', notes: '' },
+                    email: { status: 'ON_PROGRESS', date: '', notes: 'Menunggu IT' },
+                    presensi: { status: 'DONE', date: '2025-01-10', notes: '' },
+                    review1: { status: 'DONE', scheduledDate: '2025-02-10', actualDate: '2025-02-12', notes: 'Lulus' },
+                    review2: { status: 'NONE', scheduledDate: '2025-03-10', actualDate: '', notes: '' },
+                    review3: { status: 'NONE', scheduledDate: '2025-04-10', actualDate: '', notes: '' }
+                }
+            },
+            {
+                id: 2, name: "NOVIA", email: "novia@perusahaan.com", avatar: "https://ui-avatars.com/api/?name=NOVIA&background=10B981&color=fff", 
+                role: "Staff", department: "Sales Marketing", entity: "PT Beta Teknologi", startDate: "2025-02-01",
+                checklist: {
+                    data: { status: 'DONE', date: '2025-02-01', notes: '' },
+                    kontrak: { status: 'DONE', date: '2025-02-01', notes: '' },
+                    bast: { status: 'DONE', date: '2025-02-02', notes: '' },
+                    email: { status: 'DONE', date: '2025-02-02', notes: '' },
+                    presensi: { status: 'DONE', date: '2025-02-01', notes: '' },
+                    review_ojt: { status: 'ON_PROGRESS', scheduledDate: '2025-02-15', actualDate: '', notes: 'Sedang shadowing di lapangan' },
+                    review1: { status: 'NONE', scheduledDate: '2025-03-01', actualDate: '', notes: '' },
+                    review2: { status: 'NONE', scheduledDate: '2025-04-01', actualDate: '', notes: '' },
+                    review3: { status: 'NONE', scheduledDate: '2025-05-01', actualDate: '', notes: '' }
+                }
+            }
+        ];
+
+        // State variables
+        let currentEmployeeId = null;
+        let currentEditingItemId = null;
+        let currentEditingItemType = null; // 'admin' or 'review'
+        let editingTemplateIndex = null; // Menyimpan index item admin yang sedang di-edit
+
+        // State Master Data (Posisi & Departemen)
+        let masterRoles = ["Staff", "Supervisor", "Manager"];
+        let masterDepartments = ["Operasional", "Sales Marketing", "Finance", "Engineering", "HR"];
+        let masterEntities = ["PT Alpha Jaya", "PT Beta Teknologi", "CV Gamma Sentosa"];
+        
+        let currentEditTableEmpId = null; // ID untuk fungsi Edit Karyawan
+
+        // State Kalender (Bulan & Tahun Saat Ini)
+        let currentCalDate = new Date(); 
+
+        // --- STREAMING_CHUNK:Core UI Functions (Sidebar, Navigation) ---
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        }
+
+        function switchView(viewName) {
+            document.getElementById('dashboard-view').classList.add('hidden');
+            document.getElementById('calendar-view').classList.add('hidden');
+            document.getElementById('admin-view').classList.add('hidden');
+            
+            document.getElementById('menu-btn-dashboard').className = "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors";
+            document.getElementById('menu-btn-calendar').className = "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors";
+            document.getElementById('menu-btn-admin').className = "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors";
+
+            if(viewName === 'dashboard') {
+                document.getElementById('dashboard-view').classList.remove('hidden');
+                document.getElementById('topbar-title').innerText = "Monitoring Onboarding";
+                document.getElementById('menu-btn-dashboard').className = "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors bg-indigo-600 text-white";
+                renderTable();
+            } else if(viewName === 'calendar') {
+                document.getElementById('calendar-view').classList.remove('hidden');
+                document.getElementById('topbar-title').innerText = "Kalender Review";
+                document.getElementById('menu-btn-calendar').className = "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors bg-indigo-600 text-white";
+                renderCalendar();
+            } else {
+                document.getElementById('admin-view').classList.remove('hidden');
+                document.getElementById('topbar-title').innerText = "Pengaturan Admin";
+                document.getElementById('menu-btn-admin').className = "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors bg-indigo-600 text-white";
+                renderAdminTemplates();
+            }
+            if(window.innerWidth < 1024) toggleSidebar();
+        }
+
+        function showNotification(msg) {
+            const notif = document.getElementById('notification');
+            document.getElementById('notification-text').innerText = msg;
+            notif.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => notif.classList.add('translate-y-20', 'opacity-0'), 3000);
+        }
+
+        function generateLink(event, docType) {
+            event.stopPropagation();
+            navigator.clipboard.writeText(`https://hr.corp.com/form/${docType.replace(/\s/g,'').toLowerCase()}`)
+                .then(() => showNotification(`Link ${docType} disalin!`));
+        }
+
+        // --- STREAMING_CHUNK:Helper Functions (Status, Calculations) ---
+        function formatDateUI(dateStr) {
+            if (!dateStr) return '';
+            const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            const [year, month, day] = dateStr.split('-');
+            if (!year || !month || !day) return dateStr;
+            return `${parseInt(day)} ${months[parseInt(month) - 1]} ${year}`;
+        }
+
+        function populateDropdowns() {
+            // Update Filter Posisi & Departemen
+            const filterRole = document.getElementById('filter-role');
+            const filterDept = document.getElementById('filter-dept');
+            const filterEntity = document.getElementById('filter-entity');
+            
+            if(filterRole) filterRole.innerHTML = '<option value="">Semua Posisi</option>' + masterRoles.map(r => `<option value="${r}">${r}</option>`).join('');
+            if(filterDept) filterDept.innerHTML = '<option value="">Semua Departemen</option>' + masterDepartments.map(d => `<option value="${d}">${d}</option>`).join('');
+            if(filterEntity) filterEntity.innerHTML = '<option value="">Semua Entitas</option>' + masterEntities.map(e => `<option value="${e}">${e}</option>`).join('');
+
+            // Update Form Tambah & Edit
+            const roleOpts = masterRoles.map(r => `<option value="${r}">${r}</option>`).join('');
+            const deptOpts = masterDepartments.map(d => `<option value="${d}">${d}</option>`).join('');
+            const entityOpts = masterEntities.map(e => `<option value="${e}">${e}</option>`).join('');
+
+            ['add-role', 'edit-role'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerHTML = roleOpts; });
+            ['add-dept', 'edit-dept'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerHTML = deptOpts; });
+            ['add-entity', 'edit-entity'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerHTML = entityOpts; });
+        }
+
+        function getStatusInfo(statusVal) {
+            switch(statusVal) {
+                case 'DONE': return { text: 'Selesai', color: 'text-green-700 bg-green-100 border-green-200', icon: 'fa-check-circle text-green-500' };
+                case 'ON_PROGRESS': return { text: 'On Progress', color: 'text-blue-700 bg-blue-100 border-blue-200', icon: 'fa-spinner fa-spin text-blue-500' };
+                case 'CANCELLED': return { text: 'Dibatalkan', color: 'text-red-700 bg-red-100 border-red-200', icon: 'fa-ban text-red-500' };
+                default: return { text: 'Belum', color: 'text-slate-600 bg-slate-100 border-slate-200', icon: 'fa-circle text-slate-300' };
+            }
+        }
+
+        function getEmployeeTemplates(emp) {
+            let reviews = [...baseReviewChecklistTemplate];
+            // Logika OJT untuk Sales Marketing
+            if (emp.role.toLowerCase() === 'staff' && emp.department.toLowerCase() === 'sales marketing') {
+                reviews.unshift({ 
+                    id: 'review_ojt', label: 'Review OJT', type: 'review', 
+                    instructions: ["Evaluasi pemahaman produk", "Simulasi sales call"], 
+                    policies: ["Wajib lulus sebelum bertemu klien langsung."] 
+                });
+            }
+            return { admin: adminChecklistTemplate, reviews: reviews };
+        }
+
+        function calculateProgress(emp) {
+            if (emp.isTerminated) return 100;
+
+            const templates = getEmployeeTemplates(emp);
+            const allItems = [...templates.admin, ...templates.reviews];
+            if(allItems.length === 0) return 0;
+            
+            let doneCount = 0;
+            allItems.forEach(item => {
+                if (emp.checklist[item.id] && emp.checklist[item.id].status === 'DONE') doneCount++;
+            });
+            return Math.round((doneCount / allItems.length) * 100);
+        }
+
+        // --- STREAMING_CHUNK:Dashboard Table Logic ---
+        function renderTable() {
+            const tbody = document.getElementById('employee-table-body');
+            tbody.innerHTML = '';
+            
+            // Mengambil Nilai Filter
+            const filterName = document.getElementById('filter-name')?.value.toLowerCase() || '';
+            const filterRole = document.getElementById('filter-role')?.value || '';
+            const filterDept = document.getElementById('filter-dept')?.value || '';
+            const filterEntity = document.getElementById('filter-entity')?.value || '';
+            const filterProgress = document.getElementById('filter-progress')?.value || '';
+
+            let totalProgress = 0;
+            let displayCount = 0;
+
+            employees.forEach(emp => {
+                const progress = calculateProgress(emp);
+                
+                // Logika Filter
+                let isMatch = true;
+                if (filterName && !emp.name.toLowerCase().includes(filterName)) isMatch = false;
+                if (filterRole && emp.role !== filterRole) isMatch = false;
+                if (filterDept && emp.department !== filterDept) isMatch = false;
+                if (filterEntity && emp.entity !== filterEntity) isMatch = false;
+                
+                if (filterProgress) {
+                    if (filterProgress === 'terminated' && !emp.isTerminated) isMatch = false;
+                    if (filterProgress !== 'terminated' && emp.isTerminated) isMatch = false; // Kecualikan yang terminated jika cari persentase angka
+                    
+                    if (filterProgress === '0-25' && (progress < 0 || progress > 25)) isMatch = false;
+                    if (filterProgress === '26-50' && (progress < 26 || progress > 50)) isMatch = false;
+                    if (filterProgress === '51-75' && (progress < 51 || progress > 75)) isMatch = false;
+                    if (filterProgress === '76-100' && (progress < 76 || progress > 100)) isMatch = false;
+                }
+
+                if (!isMatch) return; // Lewati jika tidak cocok dengan filter
+
+                displayCount++;
+                totalProgress += progress;
+                let progColor = progress === 100 ? 'bg-green-500' : (progress < 40 ? 'bg-orange-500' : 'bg-indigo-500');
+                
+                let badgeHtml = '';
+                if (emp.isTerminated) {
+                    progColor = 'bg-red-500';
+                    badgeHtml = `<span class="bg-red-50 text-red-700 text-[9px] px-2 py-0.5 rounded font-bold uppercase tracking-wider border border-red-200 ml-2" title="${emp.terminationNotes}">${emp.terminationReasonType}</span>`;
+                }
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition-colors group">
+                        <td class="p-4 border-b border-gray-100">
+                            <div class="flex items-center gap-3">
+                                <img src="${emp.avatar}" class="w-9 h-9 rounded-full object-cover">
+                                <div>
+                                    <p class="font-bold text-gray-900 text-sm group-hover:text-indigo-600 transition-colors">${emp.name}</p>
+                                    <p class="text-[11px] text-gray-500">${emp.email}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="p-4 border-b border-gray-100">
+                            <p class="text-sm font-medium text-gray-800">${emp.role}</p>
+                            <p class="text-[11px] text-gray-500">${emp.department}</p>
+                        </td>
+                        <td class="p-4 border-b border-gray-100 text-sm font-medium text-gray-700">${emp.entity}</td>
+                        <td class="p-4 border-b border-gray-100 text-sm text-gray-600">${formatDateUI(emp.startDate)}</td>
+                        <td class="p-4 border-b border-gray-100">
+                            <div class="flex items-center mb-1">
+                                <span class="text-xs font-bold text-gray-700">${progress}%</span>
+                                ${badgeHtml}
+                            </div>
+                            <div class="w-full bg-slate-200 rounded-full h-1.5"><div class="${progColor} h-1.5 rounded-full progress-bar-animated" style="width: ${progress}%"></div></div>
+                        </td>
+                        <td class="p-4 border-b border-gray-100 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <button onclick="openDetailModal(${emp.id})" class="px-3 py-1.5 bg-white border border-indigo-200 text-indigo-700 rounded-lg text-xs font-bold hover:bg-indigo-50 transition-all shadow-sm">
+                                    Detail
+                                </button>
+                                <button onclick="openEditEmployeeModal(${emp.id})" class="px-3 py-1.5 bg-white border border-slate-300 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-50 transition-all shadow-sm" title="Edit Data">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            if(displayCount === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-sm text-gray-500 font-medium">Tidak ada data karyawan yang sesuai dengan filter.</td></tr>`;
+            }
+
+            // Update Statistik Card berdasarkan Filter
+            document.getElementById('total-onboarding').innerText = displayCount;
+            const avg = displayCount > 0 ? Math.round(totalProgress / displayCount) : 0;
+            document.getElementById('avg-progress').innerText = `${avg}%`;
+            document.getElementById('avg-progress-bar').style.width = `${avg}%`;
+        }
+
+        function resetFilters() {
+            if(document.getElementById('filter-name')) document.getElementById('filter-name').value = '';
+            document.getElementById('filter-role').value = '';
+            document.getElementById('filter-dept').value = '';
+            document.getElementById('filter-entity').value = '';
+            document.getElementById('filter-progress').value = '';
+            renderTable();
+        }
+
+        // --- STREAMING_CHUNK:Add Employee Logic ---
+        function openAddModal() {
+            const m = document.getElementById('add-modal');
+            m.classList.remove('hidden');
+            setTimeout(() => { m.classList.remove('opacity-0'); m.children[0].classList.remove('scale-95'); }, 10);
+        }
+        function closeAddModal() {
+            const m = document.getElementById('add-modal');
+            m.classList.add('opacity-0'); m.children[0].classList.add('scale-95');
+            setTimeout(() => m.classList.add('hidden'), 300);
+        }
+        function openAddEmployeeModal() { document.getElementById('form-add-emp').reset(); openAddModal(); }
+
+        function submitNewEmployee(e) {
+            e.preventDefault();
+            const name = document.getElementById('add-name').value;
+            const newId = employees.length > 0 ? Math.max(...employees.map(x=>x.id)) + 1 : 1;
+            const newEmp = {
+                id: newId, name: name.toUpperCase(), email: document.getElementById('add-email').value,
+                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4F46E5&color=fff`,
+                role: document.getElementById('add-role').value, department: document.getElementById('add-dept').value,
+                entity: document.getElementById('add-entity').value, startDate: document.getElementById('add-start').value,
+                checklist: {} // empty initially
+            };
+            // init empty checklist items
+            const tmpl = getEmployeeTemplates(newEmp);
+            [...tmpl.admin, ...tmpl.reviews].forEach(t => {
+                newEmp.checklist[t.id] = { status: 'NONE', date: '', scheduledDate: '', actualDate: '', notes: '' };
+            });
+            
+            employees.push(newEmp);
+            closeAddModal();
+            renderTable();
+            showNotification(`${name} ditambahkan!`);
+        }
+
+        function openEditEmployeeModal(empId) {
+            currentEditTableEmpId = empId;
+            const emp = employees.find(e => e.id === empId);
+            if(!emp) return;
+
+            document.getElementById('edit-name').value = emp.name;
+            document.getElementById('edit-email').value = emp.email;
+            document.getElementById('edit-start').value = emp.startDate;
+            document.getElementById('edit-role').value = emp.role;
+            document.getElementById('edit-dept').value = emp.department;
+            document.getElementById('edit-entity').value = emp.entity;
+
+            const m = document.getElementById('edit-emp-modal');
+            m.classList.remove('hidden');
+            setTimeout(() => { m.classList.remove('opacity-0'); m.children[0].classList.remove('scale-95'); }, 10);
+        }
+
+        function closeEditEmployeeModal() {
+            const m = document.getElementById('edit-emp-modal');
+            m.classList.add('opacity-0'); m.children[0].classList.add('scale-95');
+            setTimeout(() => { m.classList.add('hidden'); currentEditTableEmpId = null; }, 300);
+        }
+
+        function submitEditEmployee(e) {
+            e.preventDefault();
+            if(!currentEditTableEmpId) return;
+
+            const emp = employees.find(e => e.id === currentEditTableEmpId);
+            const oldRole = emp.role;
+            const oldDept = emp.department;
+
+            emp.name = document.getElementById('edit-name').value.toUpperCase();
+            emp.email = document.getElementById('edit-email').value;
+            emp.startDate = document.getElementById('edit-start').value;
+            emp.role = document.getElementById('edit-role').value;
+            emp.department = document.getElementById('edit-dept').value;
+            emp.entity = document.getElementById('edit-entity').value;
+            
+            // Perbarui Avatar jika nama berubah
+            emp.avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(emp.name)}&background=4F46E5&color=fff`;
+
+            // Reset checklist jika ada perubahan fatal yang memerlukan review ulang
+            if(oldRole !== emp.role || oldDept !== emp.department) {
+                 // Otomatis meregenerasi checklist (opsional, disesuaikan kebutuhan HR)
+                 // Untuk simulasi ini kita biarkan, tapi fungsi getEmployeeTemplates akan menyesuaikan List Review OJT.
+            }
+
+            closeEditEmployeeModal();
+            renderTable();
+            showNotification(`Data ${emp.name} diperbarui!`);
+        }
+
+        // --- STREAMING_CHUNK:Terminate Onboarding Logic ---
+        function openTerminateModal() {
+            if(!currentEmployeeId) return;
+            document.getElementById('form-terminate').reset();
+            const m = document.getElementById('terminate-modal');
+            m.classList.remove('hidden');
+            setTimeout(() => { m.classList.remove('opacity-0'); m.children[0].classList.remove('scale-95'); }, 10);
+        }
+
+        function closeTerminateModal() {
+            const m = document.getElementById('terminate-modal');
+            m.classList.add('opacity-0'); m.children[0].classList.add('scale-95');
+            setTimeout(() => m.classList.add('hidden'), 300);
+        }
+
+        function submitTerminate(e) {
+            e.preventDefault();
+            if(!currentEmployeeId) return;
+            
+            const emp = employees.find(e => e.id === currentEmployeeId);
+            const reason = document.getElementById('term-reason').value;
+            const notes = document.getElementById('term-notes').value;
+            
+            emp.isTerminated = true;
+            emp.terminationReasonType = reason;
+            emp.terminationNotes = notes;
+            
+            closeTerminateModal();
+            refreshModalLists(emp);
+            renderTable();
+            showNotification(`Onboarding ${emp.name} diselesaikan.`);
+        }
+        
+        function cancelTermination() {
+            if(!currentEmployeeId) return;
+            const emp = employees.find(e => e.id === currentEmployeeId);
+            if(emp && emp.isTerminated) {
+                emp.isTerminated = false;
+                emp.terminationReasonType = '';
+                emp.terminationNotes = '';
+                
+                refreshModalLists(emp);
+                renderTable();
+                showNotification(`Status penyelesaian onboarding dibatalkan.`);
+            }
+        }
+
+        // --- STREAMING_CHUNK:Modal Detail & Canvas Logic ---
+        function openDetailModal(empId) {
+            currentEmployeeId = empId;
+            const emp = employees.find(e => e.id === empId);
+            document.getElementById('modal-name').innerText = emp.name;
+            document.getElementById('modal-role-entity').innerHTML = `${emp.role} | ${emp.department} &bull; ${emp.entity}`;
+            document.getElementById('modal-avatar').src = emp.avatar;
+
+            refreshModalLists(emp);
+
+            const m = document.getElementById('detail-modal');
+            m.classList.remove('hidden');
+            setTimeout(() => { m.classList.remove('opacity-0'); m.children[0].classList.remove('scale-95'); }, 10);
+        }
+
+        function closeDetailModal() {
+            closeItemCanvas(); // ensure canvas closes too
+            const m = document.getElementById('detail-modal');
+            m.classList.add('opacity-0'); m.children[0].classList.add('scale-95');
+            setTimeout(() => { m.classList.add('hidden'); currentEmployeeId = null; }, 300);
+            renderTable(); // Update main table in case progress changed
+        }
+
+        function refreshModalLists(emp) {
+            const tmpl = getEmployeeTemplates(emp);
+            
+            const btnTerminate = document.getElementById('btn-terminate');
+            let bannerEl = document.getElementById('terminate-alert-banner');
+            
+            // Buat banner secara dinamis jika belum ada
+            if (!bannerEl) {
+                const gridDiv = document.querySelector('#detail-modal .grid');
+                gridDiv.insertAdjacentHTML('beforebegin', '<div id="terminate-alert-banner" class="hidden mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex flex-col gap-1 shadow-sm"></div>');
+                bannerEl = document.getElementById('terminate-alert-banner');
+            }
+
+            const progressText = document.getElementById('modal-progress-text');
+            
+            // Reset color
+            progressText.className = 'text-2xl font-black leading-none text-indigo-600';
+
+            if (emp.isTerminated) {
+                btnTerminate.classList.add('hidden');
+                progressText.classList.replace('text-indigo-600', 'text-red-600');
+                
+                bannerEl.innerHTML = `
+                    <div class="flex justify-between items-start w-full">
+                        <div>
+                            <strong class="text-sm text-red-700 flex items-center gap-2"><i class="fa-solid fa-circle-info"></i> Onboarding Diselesaikan: ${emp.terminationReasonType}</strong>
+                            <p class="text-xs text-red-600 ml-6 mt-1">${emp.terminationNotes}</p>
+                        </div>
+                        <button onclick="cancelTermination()" class="bg-white px-3 py-1.5 rounded-lg border border-red-200 text-red-600 text-xs font-bold hover:bg-red-50 hover:text-red-800 transition-colors shadow-sm whitespace-nowrap flex items-center gap-1.5">
+                            <i class="fa-solid fa-rotate-left"></i> Batalkan
+                        </button>
+                    </div>`;
+                bannerEl.classList.remove('hidden');
+            } else {
+                btnTerminate.classList.remove('hidden');
+                bannerEl.classList.add('hidden');
+            }
+
+            document.getElementById('admin-list').innerHTML = tmpl.admin.map(t => renderItemCard(emp, t)).join('');
+            document.getElementById('review-list').innerHTML = tmpl.reviews.map(t => renderItemCard(emp, t)).join('');
+            
+            const progress = calculateProgress(emp);
+            progressText.innerText = `${progress}%`;
+            
+            if (progress === 100 && !emp.isTerminated) {
+                 progressText.classList.replace('text-indigo-600', 'text-green-500');
+            }
+        }
+
+        function renderItemCard(emp, templateItem) {
+            // pastikan data exist
+            if(!emp.checklist[templateItem.id]) {
+                emp.checklist[templateItem.id] = { status: 'NONE', date: '', scheduledDate: '', actualDate: '', notes: '' };
+            }
+            const data = emp.checklist[templateItem.id];
+            const stat = getStatusInfo(data.status);
+            
+            let dateText = '';
+            if (templateItem.type === 'admin' && data.date) {
+                dateText = `<span class="text-[10px] text-slate-500 flex items-center gap-1 mt-1"><i class="fa-regular fa-calendar"></i> Selesai: ${formatDateUI(data.date)}</span>`;
+            } else if (templateItem.type === 'review' && data.scheduledDate) {
+                dateText = `<span class="text-[10px] text-slate-500 flex items-center gap-1 mt-1"><i class="fa-regular fa-calendar"></i> Jadwal: ${formatDateUI(data.scheduledDate)}</span>`;
+            }
+
+            return `
+                <div onclick="openItemCanvas('${templateItem.id}', '${templateItem.type}')" class="bg-white border border-slate-200 rounded-xl p-3.5 hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer group relative overflow-hidden">
+                    <div class="absolute inset-y-0 left-0 w-1 bg-transparent group-hover:bg-indigo-500 transition-colors"></div>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm font-bold text-slate-800 group-hover:text-indigo-700 transition-colors">${templateItem.label}</p>
+                            ${dateText}
+                        </div>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold border flex items-center gap-1.5 ${stat.color} whitespace-nowrap">
+                            <i class="fa-solid ${stat.icon}"></i> ${stat.text}
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- STREAMING_CHUNK:Inner Canvas (Drawer) Logic ---
+        function openItemCanvas(itemId, itemType) {
+            currentEditingItemId = itemId;
+            currentEditingItemType = itemType;
+            const emp = employees.find(e => e.id === currentEmployeeId);
+            const tmpl = getEmployeeTemplates(emp)[itemType === 'admin' ? 'admin' : 'reviews'].find(t => t.id === itemId);
+            const data = emp.checklist[itemId];
+
+            // Set Header
+            document.getElementById('canvas-type').innerText = itemType === 'admin' ? 'Administratif' : 'Review Kinerja';
+            document.getElementById('canvas-title').innerText = tmpl.label;
+            
+            // Set Texts
+            document.getElementById('canvas-instructions').innerHTML = tmpl.instructions.map(i => `<li>${i}</li>`).join('');
+            document.getElementById('canvas-policies').innerHTML = tmpl.policies.map(i => `<li>${i}</li>`).join('');
+
+            // Set Inputs
+            document.getElementById('input-status').value = data.status;
+            document.getElementById('input-notes').value = data.notes || '';
+
+            // Toggle Date fields based on type
+            const adminGrp = document.getElementById('date-group-admin');
+            const reviewGrp = document.getElementById('date-group-review');
+            if (itemType === 'admin') {
+                adminGrp.classList.remove('hidden'); reviewGrp.classList.add('hidden');
+                document.getElementById('input-date-single').value = data.date || '';
+            } else {
+                adminGrp.classList.add('hidden'); reviewGrp.classList.remove('hidden');
+                document.getElementById('input-date-schedule').value = data.scheduledDate || '';
+                document.getElementById('input-date-actual').value = data.actualDate || '';
+            }
+
+            // Animate Drawer In
+            const canvas = document.getElementById('item-canvas');
+            canvas.classList.remove('hidden');
+            setTimeout(() => canvas.classList.remove('translate-x-full'), 10);
+        }
+
+        function closeItemCanvas() {
+            const canvas = document.getElementById('item-canvas');
+            canvas.classList.add('translate-x-full');
+            setTimeout(() => { canvas.classList.add('hidden'); currentEditingItemId = null; }, 300);
+        }
+
+        function saveItemDetail() {
+            if(!currentEmployeeId || !currentEditingItemId) return;
+            const emp = employees.find(e => e.id === currentEmployeeId);
+            const data = emp.checklist[currentEditingItemId];
+
+            data.status = document.getElementById('input-status').value;
+            data.notes = document.getElementById('input-notes').value;
+
+            if (currentEditingItemType === 'admin') {
+                data.date = document.getElementById('input-date-single').value;
+            } else {
+                data.scheduledDate = document.getElementById('input-date-schedule').value;
+                data.actualDate = document.getElementById('input-date-actual').value;
+            }
+
+            showNotification(`Data '${currentEditingItemId}' disimpan.`);
+            closeItemCanvas();
+            refreshModalLists(emp);
+        }
+
+        // --- STREAMING_CHUNK:Calendar View Logic ---
+        function changeCalMonth(offset) {
+            currentCalDate.setMonth(currentCalDate.getMonth() + offset);
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            const monthYearText = document.getElementById('calendar-month-year');
+            if (!grid || !monthYearText) return;
+
+            grid.innerHTML = '';
+            
+            const year = currentCalDate.getFullYear();
+            const month = currentCalDate.getMonth();
+            
+            const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            monthYearText.innerText = `${monthNames[month]} ${year}`;
+
+            // Mencari hari pertama dalam bulan (0 = Minggu, 1 = Senin ... 6 = Sabtu)
+            let firstDay = new Date(year, month, 1).getDay();
+            // Menyesuaikan agar Senin = 0, Minggu = 6
+            firstDay = firstDay === 0 ? 6 : firstDay - 1; 
+            
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // Kumpulkan semua jadwal yang ada di bulan ini
+            let remindersMap = {};
+            employees.forEach(emp => {
+                const tmpl = getEmployeeTemplates(emp).reviews;
+                tmpl.forEach(t => {
+                    const data = emp.checklist[t.id];
+                    if (data && data.scheduledDate && data.status !== 'DONE' && data.status !== 'CANCELLED') {
+                        const dateStr = data.scheduledDate; // YYYY-MM-DD
+                        if(!remindersMap[dateStr]) remindersMap[dateStr] = [];
+                        remindersMap[dateStr].push({ empName: emp.name, task: t.label, status: data.status, role: emp.role });
+                    }
+                });
+            });
+
+            // Isi slot kosong sebelum tanggal 1
+            for (let i = 0; i < firstDay; i++) {
+                grid.innerHTML += `<div class="p-2 border-r border-b border-gray-100 bg-gray-50/50 min-h-[120px]"></div>`;
+            }
+
+            // Render tanggal-tanggal
+            const today = new Date();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const currentDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+                
+                let eventsHtml = '';
+                if(remindersMap[currentDateStr]) {
+                    remindersMap[currentDateStr].forEach(rem => {
+                        const isPast = new Date(currentDateStr) < new Date(today.setHours(0,0,0,0));
+                        const bgClass = isPast ? 'bg-red-50 border-red-200 text-red-700' : 'bg-indigo-50 border-indigo-200 text-indigo-700';
+                        const dotClass = isPast ? 'bg-red-500' : 'bg-indigo-500';
+                        
+                        eventsHtml += `
+                            <div class="mt-1 p-1.5 border rounded-lg shadow-sm ${bgClass} text-[10px] leading-tight cursor-pointer hover:shadow transition-shadow" title="${rem.task} - ${rem.empName}" onclick="switchView('dashboard')">
+                                <div class="flex items-center gap-1.5 mb-0.5">
+                                    <span class="w-1.5 h-1.5 rounded-full ${dotClass}"></span>
+                                    <strong class="truncate uppercase">${rem.empName}</strong>
+                                </div>
+                                <div class="truncate opacity-80">${rem.task}</div>
+                            </div>
+                        `;
+                    });
+                }
+
+                grid.innerHTML += `
+                    <div class="p-2 border-r border-b border-gray-200 min-h-[120px] bg-white hover:bg-slate-50 transition-colors">
+                        <div class="flex justify-start mb-1">
+                            <span class="text-sm font-bold w-7 h-7 flex items-center justify-center rounded-full ${isToday ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-700'}">${day}</span>
+                        </div>
+                        <div class="flex flex-col gap-1 overflow-y-auto max-h-[90px] pr-1">
+                            ${eventsHtml}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Isi slot kosong setelah akhir bulan agar grid tetap utuh (genap 35 atau 42 kotak)
+            const totalCellsRendered = firstDay + daysInMonth;
+            const remainingCells = (Math.ceil(totalCellsRendered / 7) * 7) - totalCellsRendered;
+            for (let i = 0; i < remainingCells; i++) {
+                grid.innerHTML += `<div class="p-2 border-r border-b border-gray-100 bg-gray-50/50 min-h-[120px]"></div>`;
+            }
+        }
+
+        // --- STREAMING_CHUNK:Admin Settings Logic ---
+        function switchAdminTab(tab) {
+            if(tab === 'template') {
+                document.getElementById('admin-tab-template').classList.remove('hidden');
+                document.getElementById('admin-tab-master').classList.add('hidden');
+                
+                document.getElementById('tab-btn-template').className = "pb-3 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 transition-colors";
+                document.getElementById('tab-btn-master').className = "pb-3 text-sm font-bold text-gray-500 border-b-2 border-transparent hover:text-gray-700 transition-colors";
+            } else {
+                document.getElementById('admin-tab-template').classList.add('hidden');
+                document.getElementById('admin-tab-master').classList.remove('hidden');
+                
+                document.getElementById('tab-btn-template').className = "pb-3 text-sm font-bold text-gray-500 border-b-2 border-transparent hover:text-gray-700 transition-colors";
+                document.getElementById('tab-btn-master').className = "pb-3 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 transition-colors";
+            }
+        }
+
+        function renderAdminTemplates() {
+            renderMasterData(); // Merender Master Posisi & Departemen
+            
+            const listDiv = document.getElementById('admin-template-list');
+            listDiv.innerHTML = '';
+
+            adminChecklistTemplate.forEach((tmpl, index) => {
+                const instHtml = tmpl.instructions.map(i => `<li>${i}</li>`).join('');
+                const polHtml = tmpl.policies.map(p => `<li>${p}</li>`).join('');
+                
+                listDiv.innerHTML += `
+                    <div class="border border-gray-200 rounded-xl p-4 bg-slate-50 relative group">
+                        <div class="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="editAdminTemplate(${index})" class="text-blue-500 hover:text-blue-700 bg-white border border-blue-100 p-1.5 rounded-md shadow-sm transition-colors" title="Edit Item">
+                                <i class="fa-solid fa-pen text-sm"></i>
+                            </button>
+                            <button onclick="deleteAdminTemplate(${index})" class="text-red-500 hover:text-red-700 bg-white border border-red-100 p-1.5 rounded-md shadow-sm transition-colors" title="Hapus Item">
+                                <i class="fa-solid fa-trash-can text-sm"></i>
+                            </button>
+                        </div>
+                        <h4 class="font-bold text-indigo-700 text-base mb-3 pr-16"><i class="fa-solid fa-tag text-xs mr-1 opacity-70"></i> ${tmpl.label}</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <span class="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Instruksi Kerja</span>
+                                <ul class="list-disc list-outside ml-4 text-xs text-gray-700 space-y-1">${instHtml}</ul>
+                            </div>
+                            <div>
+                                <span class="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Policy / Kebijakan</span>
+                                <ul class="list-disc list-outside ml-4 text-xs text-gray-700 space-y-1">${polHtml}</ul>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderMasterData() {
+            const roleList = document.getElementById('list-master-role');
+            const deptList = document.getElementById('list-master-dept');
+            const entityList = document.getElementById('list-master-entity');
+            
+            if(roleList) {
+                roleList.innerHTML = masterRoles.map((role, i) => `
+                    <div class="flex justify-between items-center bg-slate-50 border border-gray-200 px-3 py-2 rounded-lg text-sm group transition-colors hover:bg-indigo-50">
+                        <span class="font-medium text-gray-700">${role}</span>
+                        <button type="button" onclick="deleteMasterRole(${i})" class="text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                `).join('');
+            }
+
+            if(deptList) {
+                deptList.innerHTML = masterDepartments.map((dept, i) => `
+                    <div class="flex justify-between items-center bg-slate-50 border border-gray-200 px-3 py-2 rounded-lg text-sm group transition-colors hover:bg-indigo-50">
+                        <span class="font-medium text-gray-700">${dept}</span>
+                        <button type="button" onclick="deleteMasterDept(${i})" class="text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                `).join('');
+            }
+
+            if(entityList) {
+                entityList.innerHTML = masterEntities.map((ent, i) => `
+                    <div class="flex justify-between items-center bg-slate-50 border border-gray-200 px-3 py-2 rounded-lg text-sm group transition-colors hover:bg-indigo-50">
+                        <span class="font-medium text-gray-700">${ent}</span>
+                        <button type="button" onclick="deleteMasterEntity(${i})" class="text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function addMasterRole(e) {
+            e.preventDefault();
+            const input = document.getElementById('input-master-role');
+            const val = input.value.trim();
+            if (val && !masterRoles.includes(val)) {
+                masterRoles.push(val);
+                input.value = '';
+                renderMasterData();
+                populateDropdowns();
+                showNotification("Posisi baru berhasil ditambahkan.");
+            } else if (masterRoles.includes(val)) {
+                showNotification("Posisi tersebut sudah ada.");
+            }
+        }
+
+        function deleteMasterRole(index) {
+            masterRoles.splice(index, 1);
+            renderMasterData();
+            populateDropdowns();
+            showNotification("Posisi berhasil dihapus.");
+        }
+
+        function addMasterDept(e) {
+            e.preventDefault();
+            const input = document.getElementById('input-master-dept');
+            const val = input.value.trim();
+            if (val && !masterDepartments.includes(val)) {
+                masterDepartments.push(val);
+                input.value = '';
+                renderMasterData();
+                populateDropdowns();
+                showNotification("Departemen baru berhasil ditambahkan.");
+            } else if (masterDepartments.includes(val)) {
+                showNotification("Departemen tersebut sudah ada.");
+            }
+        }
+
+        function deleteMasterDept(index) {
+            masterDepartments.splice(index, 1);
+            renderMasterData();
+            populateDropdowns();
+            showNotification("Departemen berhasil dihapus.");
+        }
+
+        function addMasterEntity(e) {
+            e.preventDefault();
+            const input = document.getElementById('input-master-entity');
+            const val = input.value.trim();
+            if (val && !masterEntities.includes(val)) {
+                masterEntities.push(val);
+                input.value = '';
+                renderMasterData();
+                populateDropdowns();
+                showNotification("Entitas baru berhasil ditambahkan.");
+            } else if (masterEntities.includes(val)) {
+                showNotification("Entitas tersebut sudah ada.");
+            }
+        }
+
+        function deleteMasterEntity(index) {
+            masterEntities.splice(index, 1);
+            renderMasterData();
+            populateDropdowns();
+            showNotification("Entitas berhasil dihapus.");
+        }
+
+        function editAdminTemplate(index) {
+            editingTemplateIndex = index;
+            const tmpl = adminChecklistTemplate[index];
+            
+            // Isi form dengan data yang dipilih
+            document.getElementById('tmpl-label').value = tmpl.label;
+            document.getElementById('tmpl-inst').value = tmpl.instructions.join('\n');
+            document.getElementById('tmpl-pol').value = tmpl.policies.join('\n');
+
+            // Ubah UI Form menjadi mode Edit
+            document.getElementById('form-admin-title').innerText = "Edit Item Administratif";
+            document.getElementById('text-submit-template').innerText = "Simpan Perubahan";
+            document.getElementById('icon-submit-template').className = "fa-solid fa-floppy-disk";
+            
+            document.getElementById('btn-cancel-edit').classList.remove('hidden');
+            document.getElementById('btn-submit-template').classList.remove('w-full');
+            document.getElementById('btn-submit-template').classList.add('w-2/3');
+            
+            // Arahkan scroll ke atas (posisi form) agar terlihat
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function cancelEditTemplate() {
+            editingTemplateIndex = null;
+            document.getElementById('form-add-template').reset();
+            
+            // Kembalikan UI Form ke mode Tambah Baru
+            document.getElementById('form-admin-title').innerText = "Tambah Item Baru";
+            document.getElementById('text-submit-template').innerText = "Tambah Item";
+            document.getElementById('icon-submit-template').className = "fa-solid fa-plus";
+            
+            document.getElementById('btn-cancel-edit').classList.add('hidden');
+            document.getElementById('btn-submit-template').classList.remove('w-2/3');
+            document.getElementById('btn-submit-template').classList.add('w-full');
+        }
+
+        function saveNewAdminTemplate(e) {
+            e.preventDefault();
+            const label = document.getElementById('tmpl-label').value;
+            const instRaw = document.getElementById('tmpl-inst').value;
+            const polRaw = document.getElementById('tmpl-pol').value;
+
+            // Pisahkan berdasarkan baris baru (enter), bersihkan spasi, abaikan baris kosong
+            const instList = instRaw.split('\n').map(s => s.trim()).filter(s => s !== '');
+            const polList = polRaw.split('\n').map(s => s.trim()).filter(s => s !== '');
+
+            if (editingTemplateIndex !== null) {
+                // Mode Edit: Update item yang sudah ada
+                adminChecklistTemplate[editingTemplateIndex].label = label;
+                adminChecklistTemplate[editingTemplateIndex].instructions = instList.length > 0 ? instList : ['-'];
+                adminChecklistTemplate[editingTemplateIndex].policies = polList.length > 0 ? polList : ['-'];
+                showNotification('Item berhasil diperbarui!');
+            } else {
+                // Mode Tambah: Buat item baru
+                const newItem = {
+                    id: 'admin_custom_' + Date.now(),
+                    label: label,
+                    type: 'admin',
+                    instructions: instList.length > 0 ? instList : ['-'],
+                    policies: polList.length > 0 ? polList : ['-']
+                };
+                adminChecklistTemplate.push(newItem);
+                showNotification('Item Administratif berhasil ditambahkan!');
+            }
+
+            renderAdminTemplates();
+            cancelEditTemplate(); // Reset form ke mode default
+        }
+
+        function deleteAdminTemplate(index) {
+            // Karena ini simulasi tanpa database, kita langsung menghapus dari array state.
+            adminChecklistTemplate.splice(index, 1);
+            renderAdminTemplates();
+            showNotification('Item berhasil dihapus.');
+        }
+
+        // --- Init ---
+        document.addEventListener('DOMContentLoaded', () => {
+            populateDropdowns(); // Load options form state on initial load
+            renderTable();
+        });
+    </script>
+</body>
+</html>
