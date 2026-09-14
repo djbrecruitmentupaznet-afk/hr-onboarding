@@ -130,23 +130,18 @@
                     <label class="block text-xs font-bold text-gray-700 mb-1.5">Posisi</label>
                     <select id="filter-role" onchange="renderTable()" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500">
                         <option value="">Semua Posisi</option>
-                        <!-- Diisi otomatis oleh JS -->
                     </select>
                 </div>
                 <div class="flex-grow min-w-[150px]">
                     <label class="block text-xs font-bold text-gray-700 mb-1.5">Departemen</label>
                     <select id="filter-dept" onchange="renderTable()" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500">
                         <option value="">Semua Departemen</option>
-                        <!-- Diisi otomatis oleh JS -->
                     </select>
                 </div>
                 <div class="flex-grow min-w-[150px]">
                     <label class="block text-xs font-bold text-gray-700 mb-1.5">Entitas</label>
                     <select id="filter-entity" onchange="renderTable()" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500">
                         <option value="">Semua Entitas</option>
-                        <option value="PT Alpha Jaya">PT Alpha Jaya</option>
-                        <option value="PT Beta Teknologi">PT Beta Teknologi</option>
-                        <option value="CV Gamma Sentosa">CV Gamma Sentosa</option>
                     </select>
                 </div>
                 <div class="flex-grow min-w-[150px]">
@@ -597,7 +592,24 @@
         </div>
     </div>
 
+    <!-- FIREBASE LIBRARIES -->
+    <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
+
     <script>
+        // --- KONFIGURASI FIREBASE ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCobEgxTnMagQj6c8YsfiQtwk6zkvPaq-w",
+            authDomain: "hr-onboarding-app-76582.firebaseapp.com",
+            projectId: "hr-onboarding-app-76582",
+            storageBucket: "hr-onboarding-app-76582.firebasestorage.app",
+            messagingSenderId: "594601397871",
+            appId: "1:594601397871:web:6af5c22a9c964201d5079a"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        // ----------------------------
+
         // --- STREAMING_CHUNK:Initialize Data Structures ---
         let adminChecklistTemplate = [
             { 
@@ -634,53 +646,39 @@
             { id: 'review3', label: 'Review Bulan 3 (Final)', type: 'review', instructions: ["Siapkan form evaluasi final probation", "Minta rekomendasi atasan (Lulus/Tidak)"], policies: ["Menentukan kelanjutan kontrak atau pengangkatan karyawan tetap"] }
         ];
 
-        let employees = [
-            {
-                id: 1, name: "ADHIB", email: "adhib@perusahaan.com", avatar: "https://ui-avatars.com/api/?name=ADHIB&background=4F46E5&color=fff", 
-                role: "Staff", department: "Operasional", entity: "PT Alpha Jaya", startDate: "2025-01-10",
-                checklist: {
-                    data: { status: 'DONE', date: '2025-01-11', notes: '' },
-                    kontrak: { status: 'DONE', date: '2025-01-10', notes: '' },
-                    bast: { status: 'DONE', date: '2025-01-10', notes: '' },
-                    email: { status: 'ON_PROGRESS', date: '', notes: 'Menunggu IT' },
-                    presensi: { status: 'DONE', date: '2025-01-10', notes: '' },
-                    review1: { status: 'DONE', scheduledDate: '2025-02-10', actualDate: '2025-02-12', notes: 'Lulus' },
-                    review2: { status: 'NONE', scheduledDate: '2025-03-10', actualDate: '', notes: '' },
-                    review3: { status: 'NONE', scheduledDate: '2025-04-10', actualDate: '', notes: '' }
-                }
-            },
-            {
-                id: 2, name: "NOVIA", email: "novia@perusahaan.com", avatar: "https://ui-avatars.com/api/?name=NOVIA&background=10B981&color=fff", 
-                role: "Staff", department: "Sales Marketing", entity: "PT Beta Teknologi", startDate: "2025-02-01",
-                checklist: {
-                    data: { status: 'DONE', date: '2025-02-01', notes: '' },
-                    kontrak: { status: 'DONE', date: '2025-02-01', notes: '' },
-                    bast: { status: 'DONE', date: '2025-02-02', notes: '' },
-                    email: { status: 'DONE', date: '2025-02-02', notes: '' },
-                    presensi: { status: 'DONE', date: '2025-02-01', notes: '' },
-                    review_ojt: { status: 'ON_PROGRESS', scheduledDate: '2025-02-15', actualDate: '', notes: 'Sedang shadowing di lapangan' },
-                    review1: { status: 'NONE', scheduledDate: '2025-03-01', actualDate: '', notes: '' },
-                    review2: { status: 'NONE', scheduledDate: '2025-04-01', actualDate: '', notes: '' },
-                    review3: { status: 'NONE', scheduledDate: '2025-05-01', actualDate: '', notes: '' }
-                }
-            }
-        ];
+        // Data karyawan sekarang dimuat dari Firebase
+        let employees = [];
 
         // State variables
         let currentEmployeeId = null;
         let currentEditingItemId = null;
-        let currentEditingItemType = null; // 'admin' or 'review'
-        let editingTemplateIndex = null; // Menyimpan index item admin yang sedang di-edit
+        let currentEditingItemType = null; 
+        let editingTemplateIndex = null; 
 
         // State Master Data (Posisi & Departemen)
         let masterRoles = ["Staff", "Supervisor", "Manager"];
         let masterDepartments = ["Operasional", "Sales Marketing", "Finance", "Engineering", "HR"];
         let masterEntities = ["PT Alpha Jaya", "PT Beta Teknologi", "CV Gamma Sentosa"];
         
-        let currentEditTableEmpId = null; // ID untuk fungsi Edit Karyawan
-
-        // State Kalender (Bulan & Tahun Saat Ini)
+        let currentEditTableEmpId = null; 
         let currentCalDate = new Date(); 
+
+        // --- FUNGSI LOAD DATA DARI FIREBASE ---
+        async function loadDataFromFirebase() {
+            try {
+                const snapshot = await db.collection("employees").get();
+                employees = snapshot.docs.map(doc => {
+                    let data = doc.data();
+                    data.id = doc.id; // Menggunakan String ID dari Firebase
+                    return data;
+                });
+                renderTable();
+                renderCalendar();
+            } catch (error) {
+                console.error("Error mengambil data dari Firebase:", error);
+                showNotification("Gagal memuat data karyawan!");
+            }
+        }
 
         // --- STREAMING_CHUNK:Core UI Functions (Sidebar, Navigation) ---
         function toggleSidebar() {
@@ -748,7 +746,6 @@
         }
 
         function populateDropdowns() {
-            // Update Filter Posisi & Departemen
             const filterRole = document.getElementById('filter-role');
             const filterDept = document.getElementById('filter-dept');
             const filterEntity = document.getElementById('filter-entity');
@@ -757,7 +754,6 @@
             if(filterDept) filterDept.innerHTML = '<option value="">Semua Departemen</option>' + masterDepartments.map(d => `<option value="${d}">${d}</option>`).join('');
             if(filterEntity) filterEntity.innerHTML = '<option value="">Semua Entitas</option>' + masterEntities.map(e => `<option value="${e}">${e}</option>`).join('');
 
-            // Update Form Tambah & Edit
             const roleOpts = masterRoles.map(r => `<option value="${r}">${r}</option>`).join('');
             const deptOpts = masterDepartments.map(d => `<option value="${d}">${d}</option>`).join('');
             const entityOpts = masterEntities.map(e => `<option value="${e}">${e}</option>`).join('');
@@ -778,7 +774,6 @@
 
         function getEmployeeTemplates(emp) {
             let reviews = [...baseReviewChecklistTemplate];
-            // Logika OJT untuk Sales Marketing
             if (emp.role.toLowerCase() === 'staff' && emp.department.toLowerCase() === 'sales marketing') {
                 reviews.unshift({ 
                     id: 'review_ojt', label: 'Review OJT', type: 'review', 
@@ -808,7 +803,6 @@
             const tbody = document.getElementById('employee-table-body');
             tbody.innerHTML = '';
             
-            // Mengambil Nilai Filter
             const filterName = document.getElementById('filter-name')?.value.toLowerCase() || '';
             const filterRole = document.getElementById('filter-role')?.value || '';
             const filterDept = document.getElementById('filter-dept')?.value || '';
@@ -821,7 +815,6 @@
             employees.forEach(emp => {
                 const progress = calculateProgress(emp);
                 
-                // Logika Filter
                 let isMatch = true;
                 if (filterName && !emp.name.toLowerCase().includes(filterName)) isMatch = false;
                 if (filterRole && emp.role !== filterRole) isMatch = false;
@@ -830,7 +823,7 @@
                 
                 if (filterProgress) {
                     if (filterProgress === 'terminated' && !emp.isTerminated) isMatch = false;
-                    if (filterProgress !== 'terminated' && emp.isTerminated) isMatch = false; // Kecualikan yang terminated jika cari persentase angka
+                    if (filterProgress !== 'terminated' && emp.isTerminated) isMatch = false;
                     
                     if (filterProgress === '0-25' && (progress < 0 || progress > 25)) isMatch = false;
                     if (filterProgress === '26-50' && (progress < 26 || progress > 50)) isMatch = false;
@@ -838,7 +831,7 @@
                     if (filterProgress === '76-100' && (progress < 76 || progress > 100)) isMatch = false;
                 }
 
-                if (!isMatch) return; // Lewati jika tidak cocok dengan filter
+                if (!isMatch) return; 
 
                 displayCount++;
                 totalProgress += progress;
@@ -876,10 +869,10 @@
                         </td>
                         <td class="p-4 border-b border-gray-100 text-center">
                             <div class="flex items-center justify-center gap-2">
-                                <button onclick="openDetailModal(${emp.id})" class="px-3 py-1.5 bg-white border border-indigo-200 text-indigo-700 rounded-lg text-xs font-bold hover:bg-indigo-50 transition-all shadow-sm">
+                                <button onclick="openDetailModal('${emp.id}')" class="px-3 py-1.5 bg-white border border-indigo-200 text-indigo-700 rounded-lg text-xs font-bold hover:bg-indigo-50 transition-all shadow-sm">
                                     Detail
                                 </button>
-                                <button onclick="openEditEmployeeModal(${emp.id})" class="px-3 py-1.5 bg-white border border-slate-300 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-50 transition-all shadow-sm" title="Edit Data">
+                                <button onclick="openEditEmployeeModal('${emp.id}')" class="px-3 py-1.5 bg-white border border-slate-300 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-50 transition-all shadow-sm" title="Edit Data">
                                     <i class="fa-solid fa-pen"></i>
                                 </button>
                             </div>
@@ -889,10 +882,9 @@
             });
 
             if(displayCount === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-sm text-gray-500 font-medium">Tidak ada data karyawan yang sesuai dengan filter.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-sm text-gray-500 font-medium">Tidak ada data karyawan yang sesuai.</td></tr>`;
             }
 
-            // Update Statistik Card berdasarkan Filter
             document.getElementById('total-onboarding').innerText = displayCount;
             const avg = displayCount > 0 ? Math.round(totalProgress / displayCount) : 0;
             document.getElementById('avg-progress').innerText = `${avg}%`;
@@ -908,7 +900,7 @@
             renderTable();
         }
 
-        // --- STREAMING_CHUNK:Add Employee Logic ---
+        // --- STREAMING_CHUNK:Add Employee Logic (Saves to Firebase) ---
         function openAddModal() {
             const m = document.getElementById('add-modal');
             m.classList.remove('hidden');
@@ -921,27 +913,35 @@
         }
         function openAddEmployeeModal() { document.getElementById('form-add-emp').reset(); openAddModal(); }
 
-        function submitNewEmployee(e) {
+        async function submitNewEmployee(e) {
             e.preventDefault();
             const name = document.getElementById('add-name').value;
-            const newId = employees.length > 0 ? Math.max(...employees.map(x=>x.id)) + 1 : 1;
             const newEmp = {
-                id: newId, name: name.toUpperCase(), email: document.getElementById('add-email').value,
+                name: name.toUpperCase(), email: document.getElementById('add-email').value,
                 avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4F46E5&color=fff`,
                 role: document.getElementById('add-role').value, department: document.getElementById('add-dept').value,
                 entity: document.getElementById('add-entity').value, startDate: document.getElementById('add-start').value,
-                checklist: {} // empty initially
+                checklist: {},
+                isTerminated: false
             };
-            // init empty checklist items
+            
             const tmpl = getEmployeeTemplates(newEmp);
             [...tmpl.admin, ...tmpl.reviews].forEach(t => {
                 newEmp.checklist[t.id] = { status: 'NONE', date: '', scheduledDate: '', actualDate: '', notes: '' };
             });
             
-            employees.push(newEmp);
-            closeAddModal();
-            renderTable();
-            showNotification(`${name} ditambahkan!`);
+            try {
+                // Simpan ke Firebase
+                const docRef = await db.collection("employees").add(newEmp);
+                newEmp.id = docRef.id;
+                employees.push(newEmp);
+                closeAddModal();
+                renderTable();
+                showNotification(`${name} ditambahkan ke sistem!`);
+            } catch (error) {
+                console.error(error);
+                showNotification("Gagal menambah karyawan!");
+            }
         }
 
         function openEditEmployeeModal(empId) {
@@ -967,13 +967,11 @@
             setTimeout(() => { m.classList.add('hidden'); currentEditTableEmpId = null; }, 300);
         }
 
-        function submitEditEmployee(e) {
+        async function submitEditEmployee(e) {
             e.preventDefault();
             if(!currentEditTableEmpId) return;
 
             const emp = employees.find(e => e.id === currentEditTableEmpId);
-            const oldRole = emp.role;
-            const oldDept = emp.department;
 
             emp.name = document.getElementById('edit-name').value.toUpperCase();
             emp.email = document.getElementById('edit-email').value;
@@ -981,22 +979,23 @@
             emp.role = document.getElementById('edit-role').value;
             emp.department = document.getElementById('edit-dept').value;
             emp.entity = document.getElementById('edit-entity').value;
-            
-            // Perbarui Avatar jika nama berubah
             emp.avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(emp.name)}&background=4F46E5&color=fff`;
 
-            // Reset checklist jika ada perubahan fatal yang memerlukan review ulang
-            if(oldRole !== emp.role || oldDept !== emp.department) {
-                 // Otomatis meregenerasi checklist (opsional, disesuaikan kebutuhan HR)
-                 // Untuk simulasi ini kita biarkan, tapi fungsi getEmployeeTemplates akan menyesuaikan List Review OJT.
+            try {
+                await db.collection("employees").doc(emp.id).update({
+                    name: emp.name, email: emp.email, startDate: emp.startDate,
+                    role: emp.role, department: emp.department, entity: emp.entity, avatar: emp.avatar
+                });
+                closeEditEmployeeModal();
+                renderTable();
+                showNotification(`Data ${emp.name} diperbarui!`);
+            } catch (error) {
+                console.error(error);
+                showNotification("Gagal memperbarui karyawan!");
             }
-
-            closeEditEmployeeModal();
-            renderTable();
-            showNotification(`Data ${emp.name} diperbarui!`);
         }
 
-        // --- STREAMING_CHUNK:Terminate Onboarding Logic ---
+        // --- STREAMING_CHUNK:Terminate Onboarding Logic (Saves to Firebase) ---
         function openTerminateModal() {
             if(!currentEmployeeId) return;
             document.getElementById('form-terminate').reset();
@@ -1011,7 +1010,7 @@
             setTimeout(() => m.classList.add('hidden'), 300);
         }
 
-        function submitTerminate(e) {
+        async function submitTerminate(e) {
             e.preventDefault();
             if(!currentEmployeeId) return;
             
@@ -1019,27 +1018,49 @@
             const reason = document.getElementById('term-reason').value;
             const notes = document.getElementById('term-notes').value;
             
-            emp.isTerminated = true;
-            emp.terminationReasonType = reason;
-            emp.terminationNotes = notes;
-            
-            closeTerminateModal();
-            refreshModalLists(emp);
-            renderTable();
-            showNotification(`Onboarding ${emp.name} diselesaikan.`);
+            try {
+                await db.collection("employees").doc(emp.id).update({
+                    isTerminated: true,
+                    terminationReasonType: reason,
+                    terminationNotes: notes
+                });
+                
+                emp.isTerminated = true;
+                emp.terminationReasonType = reason;
+                emp.terminationNotes = notes;
+                
+                closeTerminateModal();
+                refreshModalLists(emp);
+                renderTable();
+                showNotification(`Onboarding ${emp.name} diselesaikan.`);
+            } catch (error) {
+                console.error(error);
+                showNotification("Gagal mengubah status!");
+            }
         }
         
-        function cancelTermination() {
+        async function cancelTermination() {
             if(!currentEmployeeId) return;
             const emp = employees.find(e => e.id === currentEmployeeId);
             if(emp && emp.isTerminated) {
-                emp.isTerminated = false;
-                emp.terminationReasonType = '';
-                emp.terminationNotes = '';
-                
-                refreshModalLists(emp);
-                renderTable();
-                showNotification(`Status penyelesaian onboarding dibatalkan.`);
+                try {
+                    await db.collection("employees").doc(emp.id).update({
+                        isTerminated: false,
+                        terminationReasonType: '',
+                        terminationNotes: ''
+                    });
+                    
+                    emp.isTerminated = false;
+                    emp.terminationReasonType = '';
+                    emp.terminationNotes = '';
+                    
+                    refreshModalLists(emp);
+                    renderTable();
+                    showNotification(`Status penyelesaian dibatalkan.`);
+                } catch (error) {
+                    console.error(error);
+                    showNotification("Gagal membatalkan status!");
+                }
             }
         }
 
@@ -1059,20 +1080,18 @@
         }
 
         function closeDetailModal() {
-            closeItemCanvas(); // ensure canvas closes too
+            closeItemCanvas(); 
             const m = document.getElementById('detail-modal');
             m.classList.add('opacity-0'); m.children[0].classList.add('scale-95');
             setTimeout(() => { m.classList.add('hidden'); currentEmployeeId = null; }, 300);
-            renderTable(); // Update main table in case progress changed
+            renderTable(); 
         }
 
         function refreshModalLists(emp) {
             const tmpl = getEmployeeTemplates(emp);
-            
             const btnTerminate = document.getElementById('btn-terminate');
             let bannerEl = document.getElementById('terminate-alert-banner');
             
-            // Buat banner secara dinamis jika belum ada
             if (!bannerEl) {
                 const gridDiv = document.querySelector('#detail-modal .grid');
                 gridDiv.insertAdjacentHTML('beforebegin', '<div id="terminate-alert-banner" class="hidden mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex flex-col gap-1 shadow-sm"></div>');
@@ -1080,14 +1099,11 @@
             }
 
             const progressText = document.getElementById('modal-progress-text');
-            
-            // Reset color
             progressText.className = 'text-2xl font-black leading-none text-indigo-600';
 
             if (emp.isTerminated) {
                 btnTerminate.classList.add('hidden');
                 progressText.classList.replace('text-indigo-600', 'text-red-600');
-                
                 bannerEl.innerHTML = `
                     <div class="flex justify-between items-start w-full">
                         <div>
@@ -1116,7 +1132,6 @@
         }
 
         function renderItemCard(emp, templateItem) {
-            // pastikan data exist
             if(!emp.checklist[templateItem.id]) {
                 emp.checklist[templateItem.id] = { status: 'NONE', date: '', scheduledDate: '', actualDate: '', notes: '' };
             }
@@ -1154,19 +1169,14 @@
             const tmpl = getEmployeeTemplates(emp)[itemType === 'admin' ? 'admin' : 'reviews'].find(t => t.id === itemId);
             const data = emp.checklist[itemId];
 
-            // Set Header
             document.getElementById('canvas-type').innerText = itemType === 'admin' ? 'Administratif' : 'Review Kinerja';
             document.getElementById('canvas-title').innerText = tmpl.label;
-            
-            // Set Texts
             document.getElementById('canvas-instructions').innerHTML = tmpl.instructions.map(i => `<li>${i}</li>`).join('');
             document.getElementById('canvas-policies').innerHTML = tmpl.policies.map(i => `<li>${i}</li>`).join('');
 
-            // Set Inputs
             document.getElementById('input-status').value = data.status;
             document.getElementById('input-notes').value = data.notes || '';
 
-            // Toggle Date fields based on type
             const adminGrp = document.getElementById('date-group-admin');
             const reviewGrp = document.getElementById('date-group-review');
             if (itemType === 'admin') {
@@ -1178,7 +1188,6 @@
                 document.getElementById('input-date-actual').value = data.actualDate || '';
             }
 
-            // Animate Drawer In
             const canvas = document.getElementById('item-canvas');
             canvas.classList.remove('hidden');
             setTimeout(() => canvas.classList.remove('translate-x-full'), 10);
@@ -1190,7 +1199,7 @@
             setTimeout(() => { canvas.classList.add('hidden'); currentEditingItemId = null; }, 300);
         }
 
-        function saveItemDetail() {
+        async function saveItemDetail() {
             if(!currentEmployeeId || !currentEditingItemId) return;
             const emp = employees.find(e => e.id === currentEmployeeId);
             const data = emp.checklist[currentEditingItemId];
@@ -1205,9 +1214,19 @@
                 data.actualDate = document.getElementById('input-date-actual').value;
             }
 
-            showNotification(`Data '${currentEditingItemId}' disimpan.`);
-            closeItemCanvas();
-            refreshModalLists(emp);
+            try {
+                // Update ke Firebase
+                await db.collection("employees").doc(emp.id).update({
+                    checklist: emp.checklist
+                });
+                showNotification(`Data '${currentEditingItemId}' disimpan.`);
+                closeItemCanvas();
+                refreshModalLists(emp);
+                renderCalendar(); 
+            } catch(error) {
+                console.error(error);
+                showNotification("Gagal menyimpan progress!");
+            }
         }
 
         // --- STREAMING_CHUNK:Calendar View Logic ---
@@ -1229,33 +1248,28 @@
             const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
             monthYearText.innerText = `${monthNames[month]} ${year}`;
 
-            // Mencari hari pertama dalam bulan (0 = Minggu, 1 = Senin ... 6 = Sabtu)
             let firstDay = new Date(year, month, 1).getDay();
-            // Menyesuaikan agar Senin = 0, Minggu = 6
             firstDay = firstDay === 0 ? 6 : firstDay - 1; 
             
             const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-            // Kumpulkan semua jadwal yang ada di bulan ini
             let remindersMap = {};
             employees.forEach(emp => {
                 const tmpl = getEmployeeTemplates(emp).reviews;
                 tmpl.forEach(t => {
                     const data = emp.checklist[t.id];
                     if (data && data.scheduledDate && data.status !== 'DONE' && data.status !== 'CANCELLED') {
-                        const dateStr = data.scheduledDate; // YYYY-MM-DD
+                        const dateStr = data.scheduledDate; 
                         if(!remindersMap[dateStr]) remindersMap[dateStr] = [];
                         remindersMap[dateStr].push({ empName: emp.name, task: t.label, status: data.status, role: emp.role });
                     }
                 });
             });
 
-            // Isi slot kosong sebelum tanggal 1
             for (let i = 0; i < firstDay; i++) {
                 grid.innerHTML += `<div class="p-2 border-r border-b border-gray-100 bg-gray-50/50 min-h-[120px]"></div>`;
             }
 
-            // Render tanggal-tanggal
             const today = new Date();
             for (let day = 1; day <= daysInMonth; day++) {
                 const currentDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -1292,7 +1306,6 @@
                 `;
             }
 
-            // Isi slot kosong setelah akhir bulan agar grid tetap utuh (genap 35 atau 42 kotak)
             const totalCellsRendered = firstDay + daysInMonth;
             const remainingCells = (Math.ceil(totalCellsRendered / 7) * 7) - totalCellsRendered;
             for (let i = 0; i < remainingCells; i++) {
@@ -1318,8 +1331,7 @@
         }
 
         function renderAdminTemplates() {
-            renderMasterData(); // Merender Master Posisi & Departemen
-            
+            renderMasterData(); 
             const listDiv = document.getElementById('admin-template-list');
             listDiv.innerHTML = '';
 
@@ -1396,8 +1408,6 @@
                 renderMasterData();
                 populateDropdowns();
                 showNotification("Posisi baru berhasil ditambahkan.");
-            } else if (masterRoles.includes(val)) {
-                showNotification("Posisi tersebut sudah ada.");
             }
         }
 
@@ -1405,7 +1415,6 @@
             masterRoles.splice(index, 1);
             renderMasterData();
             populateDropdowns();
-            showNotification("Posisi berhasil dihapus.");
         }
 
         function addMasterDept(e) {
@@ -1418,8 +1427,6 @@
                 renderMasterData();
                 populateDropdowns();
                 showNotification("Departemen baru berhasil ditambahkan.");
-            } else if (masterDepartments.includes(val)) {
-                showNotification("Departemen tersebut sudah ada.");
             }
         }
 
@@ -1427,7 +1434,6 @@
             masterDepartments.splice(index, 1);
             renderMasterData();
             populateDropdowns();
-            showNotification("Departemen berhasil dihapus.");
         }
 
         function addMasterEntity(e) {
@@ -1440,8 +1446,6 @@
                 renderMasterData();
                 populateDropdowns();
                 showNotification("Entitas baru berhasil ditambahkan.");
-            } else if (masterEntities.includes(val)) {
-                showNotification("Entitas tersebut sudah ada.");
             }
         }
 
@@ -1449,19 +1453,16 @@
             masterEntities.splice(index, 1);
             renderMasterData();
             populateDropdowns();
-            showNotification("Entitas berhasil dihapus.");
         }
 
         function editAdminTemplate(index) {
             editingTemplateIndex = index;
             const tmpl = adminChecklistTemplate[index];
             
-            // Isi form dengan data yang dipilih
             document.getElementById('tmpl-label').value = tmpl.label;
             document.getElementById('tmpl-inst').value = tmpl.instructions.join('\n');
             document.getElementById('tmpl-pol').value = tmpl.policies.join('\n');
 
-            // Ubah UI Form menjadi mode Edit
             document.getElementById('form-admin-title').innerText = "Edit Item Administratif";
             document.getElementById('text-submit-template').innerText = "Simpan Perubahan";
             document.getElementById('icon-submit-template').className = "fa-solid fa-floppy-disk";
@@ -1470,7 +1471,6 @@
             document.getElementById('btn-submit-template').classList.remove('w-full');
             document.getElementById('btn-submit-template').classList.add('w-2/3');
             
-            // Arahkan scroll ke atas (posisi form) agar terlihat
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -1478,7 +1478,6 @@
             editingTemplateIndex = null;
             document.getElementById('form-add-template').reset();
             
-            // Kembalikan UI Form ke mode Tambah Baru
             document.getElementById('form-admin-title').innerText = "Tambah Item Baru";
             document.getElementById('text-submit-template').innerText = "Tambah Item";
             document.getElementById('icon-submit-template').className = "fa-solid fa-plus";
@@ -1494,18 +1493,15 @@
             const instRaw = document.getElementById('tmpl-inst').value;
             const polRaw = document.getElementById('tmpl-pol').value;
 
-            // Pisahkan berdasarkan baris baru (enter), bersihkan spasi, abaikan baris kosong
             const instList = instRaw.split('\n').map(s => s.trim()).filter(s => s !== '');
             const polList = polRaw.split('\n').map(s => s.trim()).filter(s => s !== '');
 
             if (editingTemplateIndex !== null) {
-                // Mode Edit: Update item yang sudah ada
                 adminChecklistTemplate[editingTemplateIndex].label = label;
                 adminChecklistTemplate[editingTemplateIndex].instructions = instList.length > 0 ? instList : ['-'];
                 adminChecklistTemplate[editingTemplateIndex].policies = polList.length > 0 ? polList : ['-'];
                 showNotification('Item berhasil diperbarui!');
             } else {
-                // Mode Tambah: Buat item baru
                 const newItem = {
                     id: 'admin_custom_' + Date.now(),
                     label: label,
@@ -1518,20 +1514,20 @@
             }
 
             renderAdminTemplates();
-            cancelEditTemplate(); // Reset form ke mode default
+            cancelEditTemplate(); 
         }
 
         function deleteAdminTemplate(index) {
-            // Karena ini simulasi tanpa database, kita langsung menghapus dari array state.
             adminChecklistTemplate.splice(index, 1);
             renderAdminTemplates();
             showNotification('Item berhasil dihapus.');
         }
 
-        // --- Init ---
+        // --- Init Panggilan Pertama Kali ---
         document.addEventListener('DOMContentLoaded', () => {
-            populateDropdowns(); // Load options form state on initial load
-            renderTable();
+            populateDropdowns(); 
+            // Kita panggil fungsi ambil data dari Firebase disini
+            loadDataFromFirebase();
         });
     </script>
 </body>
