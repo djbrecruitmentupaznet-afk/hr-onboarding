@@ -20,303 +20,324 @@
     <style>
         .progress-bar-animated { transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
         body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        
-        /* Custom Scrollbar for inner elements */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        
         .sidebar-transition { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .canvas-transition { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex">
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
 
-    <!-- Sidebar / Drawer -->
-    <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 text-white transform -translate-x-full sidebar-transition shadow-2xl flex flex-col">
-        <div class="h-16 flex items-center px-6 border-b border-slate-800 gap-3">
-            <div class="bg-indigo-500 text-white p-1.5 rounded-lg">
-                <i class="fa-solid fa-users-gear text-sm"></i>
-            </div>
-            <span class="font-bold text-lg tracking-tight">HR Onboarding</span>
-        </div>
-        <div class="py-6 px-4 flex-grow flex flex-col gap-2">
-            <p class="px-2 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Menu Utama</p>
-            <button onclick="switchView('dashboard')" id="menu-btn-dashboard" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors bg-indigo-600 text-white">
-                <i class="fa-solid fa-gauge-high w-5 text-center"></i> Monitoring Onboarding
-            </button>
-            <button onclick="switchView('calendar')" id="menu-btn-calendar" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
-                <i class="fa-solid fa-calendar-days w-5 text-center"></i> Tanggal Review
-            </button>
-            <button onclick="switchView('admin')" id="menu-btn-admin" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
-                <i class="fa-solid fa-gear w-5 text-center"></i> Pengaturan Admin
-            </button>
-        </div>
-        <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
-            v2.0 &copy; 2026 HR Dept
-        </div>
-    </aside>
-
-    <!-- Overlay for sidebar on mobile -->
-    <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-30 hidden opacity-0 transition-opacity"></div>
-
-    <!-- Main Content Wrapper -->
-    <div class="flex-grow flex flex-col min-h-screen w-full transition-all duration-300">
-        
-        <!-- Top Navbar -->
-        <nav class="bg-white border-b border-gray-200 sticky top-0 z-20 shadow-sm">
-            <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between h-16 items-center">
-                    <div class="flex items-center gap-4">
-                        <button onclick="toggleSidebar()" class="text-gray-500 hover:text-indigo-600 focus:outline-none p-2 rounded-lg hover:bg-slate-100 transition-colors">
-                            <i class="fa-solid fa-bars text-xl"></i>
-                        </button>
-                        <h1 id="topbar-title" class="font-bold text-lg text-gray-900 hidden sm:block">Monitoring Onboarding</h1>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <button class="text-gray-500 hover:text-gray-700 transition-colors relative">
-                            <i class="fa-solid fa-bell"></i>
-                            <span class="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
-                        </button>
-                        <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center border border-indigo-200">
-                            <span class="text-indigo-700 font-bold text-sm">HR</span>
-                        </div>
-                    </div>
+    <!-- LAYAR LOGIN -->
+    <div id="login-view" class="min-h-screen flex items-center justify-center p-4 bg-slate-900 relative overflow-hidden">
+        <div class="absolute inset-0 bg-indigo-900/20"></div>
+        <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden relative z-10 border border-slate-100">
+            <div class="p-8 pb-6 text-center bg-slate-50 border-b border-slate-100">
+                <div class="w-16 h-16 bg-indigo-600 rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-indigo-500/30 mb-4">
+                    <i class="fa-solid fa-users-gear text-2xl text-white"></i>
                 </div>
+                <h1 class="text-2xl font-black text-slate-800 tracking-tight">HR Onboarding</h1>
+                <p class="text-sm text-slate-500 mt-1 font-medium">Sistem Pemantauan Karyawan Baru</p>
             </div>
-        </nav>
-
-        <!-- View: Dashboard -->
-        <main id="dashboard-view" class="flex-grow max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full block">
-            <div class="mb-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                <div>
-                    <h2 class="text-2xl font-bold text-gray-900">Daftar Karyawan</h2>
-                    <p class="text-sm text-gray-500 mt-1">Kelola progres administratif dan review karyawan baru.</p>
-                </div>
-                
-                <div class="flex flex-wrap items-center gap-4">
-                    <div class="bg-white px-4 py-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4 min-w-[180px]">
-                        <div class="bg-blue-50 text-blue-600 p-2.5 rounded-lg"><i class="fa-solid fa-users text-lg"></i></div>
-                        <div>
-                            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Total Data</p>
-                            <p class="text-xl font-bold text-gray-900" id="total-onboarding">0</p>
+            <div class="p-8 pt-6">
+                <form id="form-login" onsubmit="handleLogin(event)" class="space-y-5">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Email Akun HR</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-envelope absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                            <input type="email" id="login-email" required class="w-full text-sm rounded-xl border border-slate-300 pl-11 pr-4 py-3 bg-slate-50/50 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-medium" placeholder="admin@perusahaan.com">
                         </div>
                     </div>
-                    <div class="bg-white px-4 py-3 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-center min-w-[200px]">
-                        <div class="flex justify-between items-end mb-2">
-                            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Rata-rata Progress</p>
-                            <p class="text-lg font-bold text-indigo-600 leading-none" id="avg-progress">0%</p>
-                        </div>
-                        <div class="w-full bg-gray-100 rounded-full h-1.5">
-                            <div class="bg-indigo-500 h-1.5 rounded-full progress-bar-animated" style="width: 0%" id="avg-progress-bar"></div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Kata Sandi</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                            <input type="password" id="login-pass" required class="w-full text-sm rounded-xl border border-slate-300 pl-11 pr-4 py-3 bg-slate-50/50 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-medium" placeholder="••••••••">
                         </div>
                     </div>
-                    <button onclick="openAddEmployeeModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-xl text-sm font-medium transition-colors shadow-sm flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i> Tambah Karyawan
+                    <button type="submit" id="btn-login" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-indigo-500/30 transition-all mt-2 active:scale-[0.98]">
+                        Masuk Sistem
                     </button>
-                </div>
+                </form>
             </div>
+        </div>
+    </div>
+    <!-- AKHIR LAYAR LOGIN -->
 
-            <div class="mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-wrap gap-4 items-end">
-                <div class="flex-grow min-w-[200px]">
-                    <label class="block text-xs font-bold text-gray-700 mb-1.5">Cari Karyawan</label>
-                    <div class="relative">
-                        <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
-                        <input type="text" id="filter-name" onkeyup="renderTable()" placeholder="Ketik nama..." class="w-full text-sm rounded-lg border border-gray-300 pl-9 pr-3 py-2 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500">
+    <!-- APLIKASI UTAMA (Disembunyikan sampai Login) -->
+    <div id="app-view" class="hidden min-h-screen w-full">
+        <!-- Sidebar / Drawer -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 text-white transform -translate-x-full sidebar-transition shadow-2xl flex flex-col">
+            <div class="h-16 flex items-center px-6 border-b border-slate-800 gap-3">
+                <div class="bg-indigo-500 text-white p-1.5 rounded-lg">
+                    <i class="fa-solid fa-users-gear text-sm"></i>
+                </div>
+                <span class="font-bold text-lg tracking-tight">HR Onboarding</span>
+            </div>
+            <div class="py-6 px-4 flex-grow flex flex-col gap-2">
+                <p class="px-2 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Menu Utama</p>
+                <button onclick="switchView('dashboard')" id="menu-btn-dashboard" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors bg-indigo-600 text-white">
+                    <i class="fa-solid fa-gauge-high w-5 text-center"></i> Monitoring Onboarding
+                </button>
+                <button onclick="switchView('calendar')" id="menu-btn-calendar" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fa-solid fa-calendar-days w-5 text-center"></i> Tanggal Review
+                </button>
+                <button onclick="switchView('admin')" id="menu-btn-admin" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fa-solid fa-gear w-5 text-center"></i> Pengaturan Admin
+                </button>
+            </div>
+            <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
+                v2.0 &copy; 2026 HR Dept
+            </div>
+        </aside>
+
+        <!-- Overlay for sidebar on mobile -->
+        <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-30 hidden opacity-0 transition-opacity"></div>
+
+        <!-- Main Content Wrapper -->
+        <div class="flex-grow flex flex-col min-h-screen w-full transition-all duration-300">
+            
+            <!-- Top Navbar -->
+            <nav class="bg-white border-b border-gray-200 sticky top-0 z-20 shadow-sm">
+                <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between h-16 items-center">
+                        <div class="flex items-center gap-4">
+                            <button onclick="toggleSidebar()" class="text-gray-500 hover:text-indigo-600 focus:outline-none p-2 rounded-lg hover:bg-slate-100 transition-colors">
+                                <i class="fa-solid fa-bars text-xl"></i>
+                            </button>
+                            <h1 id="topbar-title" class="font-bold text-lg text-gray-900 hidden sm:block">Monitoring Onboarding</h1>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <button class="text-gray-500 hover:text-gray-700 transition-colors relative mr-2">
+                                <i class="fa-solid fa-bell"></i>
+                                <span class="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
+                            </button>
+                            <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center border border-indigo-200">
+                                <span class="text-indigo-700 font-bold text-sm">HR</span>
+                            </div>
+                            <!-- Tombol Keluar (Logout) -->
+                            <button onclick="handleLogout()" class="flex items-center gap-2 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 px-3 py-1.5 rounded-lg transition-colors shadow-sm ml-2">
+                                <i class="fa-solid fa-right-from-bracket"></i> <span class="hidden sm:inline">Keluar</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
-                <div class="flex-grow min-w-[150px]">
-                    <label class="block text-xs font-bold text-gray-700 mb-1.5">Posisi</label>
-                    <select id="filter-role" onchange="renderTable()" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500">
-                        <option value="">Semua Posisi</option>
-                    </select>
-                </div>
-                <div class="flex-grow min-w-[150px]">
-                    <label class="block text-xs font-bold text-gray-700 mb-1.5">Departemen</label>
-                    <select id="filter-dept" onchange="renderTable()" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500">
-                        <option value="">Semua Departemen</option>
-                    </select>
-                </div>
-                <div class="flex-grow min-w-[150px]">
-                    <label class="block text-xs font-bold text-gray-700 mb-1.5">Entitas</label>
-                    <select id="filter-entity" onchange="renderTable()" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500">
-                        <option value="">Semua Entitas</option>
-                    </select>
-                </div>
-                <div class="flex-grow min-w-[150px]">
-                    <label class="block text-xs font-bold text-gray-700 mb-1.5">Progress</label>
-                    <select id="filter-progress" onchange="renderTable()" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500">
-                        <option value="">Semua Progress</option>
-                        <option value="0-25">0% - 25%</option>
-                        <option value="26-50">26% - 50%</option>
-                        <option value="51-75">51% - 75%</option>
-                        <option value="76-100">76% - 100%</option>
-                        <option value="terminated">Diberhentikan / Cancel</option>
-                    </select>
-                </div>
-                <div>
-                    <button onclick="resetFilters()" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-sm h-[38px] flex items-center gap-2">
-                        <i class="fa-solid fa-rotate-right"></i> Reset
-                    </button>
-                </div>
-            </div>
+            </nav>
 
-            <!-- Table Card -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse min-w-[1000px]">
-                        <thead>
-                            <tr class="bg-slate-50/80 border-b border-gray-200 text-xs uppercase tracking-wider text-gray-500">
-                                <th class="p-4 font-semibold w-[25%]">Nama Karyawan</th>
-                                <th class="p-4 font-semibold w-[20%]">Posisi & Dept</th>
-                                <th class="p-4 font-semibold w-[15%]">Entitas</th>
-                                <th class="p-4 font-semibold w-[15%]">Tgl Masuk</th>
-                                <th class="p-4 font-semibold w-[15%]">Progress</th>
-                                <th class="p-4 font-semibold w-[10%] text-center">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="employee-table-body" class="divide-y divide-gray-100">
-                            <!-- Data Karyawan -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </main>
-
-        <!-- View: Calendar / Reminder -->
-        <main id="calendar-view" class="flex-grow max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full hidden">
-            <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <div>
-                    <h2 class="text-2xl font-bold text-gray-900">Kalender Review Kinerja</h2>
-                    <p class="text-sm text-gray-500 mt-1">Jadwal review bulanan karyawan dalam tampilan kalender.</p>
-                </div>
-                <div class="flex items-center gap-4 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm">
-                    <button onclick="changeCalMonth(-1)" class="text-gray-500 hover:text-indigo-600 p-2 rounded-lg hover:bg-slate-50 transition-colors"><i class="fa-solid fa-chevron-left"></i></button>
-                    <h3 id="calendar-month-year" class="font-bold text-gray-800 min-w-[130px] text-center text-sm uppercase tracking-wide">Bulan Tahun</h3>
-                    <button onclick="changeCalMonth(1)" class="text-gray-500 hover:text-indigo-600 p-2 rounded-lg hover:bg-slate-50 transition-colors"><i class="fa-solid fa-chevron-right"></i></button>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                <!-- Calendar Header (Days) -->
-                <div class="grid grid-cols-7 bg-slate-50/80 border-b border-gray-200">
-                    <div class="p-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Sen</div>
-                    <div class="p-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Sel</div>
-                    <div class="p-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Rab</div>
-                    <div class="p-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Kam</div>
-                    <div class="p-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Jum</div>
-                    <div class="p-3 text-center text-xs font-bold text-indigo-500 uppercase tracking-wider">Sab</div>
-                    <div class="p-3 text-center text-xs font-bold text-red-500 uppercase tracking-wider">Min</div>
-                </div>
-                <!-- Calendar Grid (Dates & Events) -->
-                <div id="calendar-grid" class="grid grid-cols-7 auto-rows-[minmax(120px,auto)]">
-                    <!-- Hari-hari akan dirender oleh JS -->
-                </div>
-            </div>
-        </main>
-
-        <!-- View: Admin / Pengaturan -->
-        <main id="admin-view" class="flex-grow max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full hidden">
-            <div class="mb-6">
-                <h2 class="text-2xl font-bold text-gray-900">Pengaturan Administratif</h2>
-                <p class="text-sm text-gray-500 mt-1">Kelola data master dan pengaturan sistem onboarding.</p>
-            </div>
-
-            <!-- Tab Navigation -->
-            <div class="flex gap-6 mb-8 border-b border-gray-200">
-                <button onclick="switchAdminTab('template')" id="tab-btn-template" class="pb-3 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 transition-colors">Item Administratif</button>
-                <button onclick="switchAdminTab('master')" id="tab-btn-master" class="pb-3 text-sm font-bold text-gray-500 border-b-2 border-transparent hover:text-gray-700 transition-colors">Role, Divisi & Entitas</button>
-            </div>
-
-            <!-- TAB 1: Template Administratif -->
-            <div id="admin-tab-template" class="block">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- View: Dashboard -->
+            <main id="dashboard-view" class="flex-grow max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full block">
+                <div class="mb-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Daftar Karyawan</h2>
+                        <p class="text-sm text-gray-500 mt-1">Kelola progres administratif dan review karyawan baru.</p>
+                    </div>
                     
-                    <!-- Kolom Kiri: Form Tambah / Edit -->
-                    <div class="lg:col-span-1">
-                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sticky top-24">
-                            <h3 id="form-admin-title" class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Tambah Item Baru</h3>
-                            <form id="form-add-template" onsubmit="saveNewAdminTemplate(event)" class="space-y-4">
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-700 mb-1">Nama Item</label>
-                                    <input type="text" id="tmpl-label" required class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Contoh: Pembuatan Akun Email">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-700 mb-1">Instruksi Kerja</label>
-                                    <textarea id="tmpl-inst" required rows="3" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none resize-none" placeholder="Pisahkan dengan enter (baris baru)..."></textarea>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-700 mb-1">Policy / Kebijakan</label>
-                                    <textarea id="tmpl-pol" required rows="3" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none resize-none" placeholder="Pisahkan dengan enter (baris baru)..."></textarea>
-                                </div>
-                                <div class="pt-4 border-t border-gray-100 flex gap-3">
-                                    <button type="button" id="btn-cancel-edit" onclick="cancelEditTemplate()" class="hidden w-1/3 px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Batal</button>
-                                    <button type="submit" id="btn-submit-template" class="w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 flex items-center justify-center gap-2 transition-colors shadow-sm">
-                                        <i id="icon-submit-template" class="fa-solid fa-plus"></i> <span id="text-submit-template">Tambah Item</span>
-                                    </button>
-                                </div>
-                            </form>
+                    <div class="flex flex-wrap items-center gap-4">
+                        <div class="bg-white px-4 py-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4 min-w-[180px]">
+                            <div class="bg-blue-50 text-blue-600 p-2.5 rounded-lg"><i class="fa-solid fa-users text-lg"></i></div>
+                            <div>
+                                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Total Data</p>
+                                <p class="text-xl font-bold text-gray-900" id="total-onboarding">0</p>
+                            </div>
+                        </div>
+                        <div class="bg-white px-4 py-3 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-center min-w-[200px]">
+                            <div class="flex justify-between items-end mb-2">
+                                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Rata-rata Progress</p>
+                                <p class="text-lg font-bold text-indigo-600 leading-none" id="avg-progress">0%</p>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-1.5">
+                                <div class="bg-indigo-500 h-1.5 rounded-full progress-bar-animated" style="width: 0%" id="avg-progress-bar"></div>
+                            </div>
+                        </div>
+                        <button onclick="openAddEmployeeModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-xl text-sm font-medium transition-colors shadow-sm flex items-center gap-2">
+                            <i class="fa-solid fa-plus"></i> Tambah Karyawan
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-wrap gap-4 items-end">
+                    <div class="flex-grow min-w-[200px]">
+                        <label class="block text-xs font-bold text-gray-700 mb-1.5">Cari Karyawan</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                            <input type="text" id="filter-name" onkeyup="renderTable()" placeholder="Ketik nama..." class="w-full text-sm rounded-lg border border-gray-300 pl-9 pr-3 py-2 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500">
                         </div>
                     </div>
+                    <div class="flex-grow min-w-[150px]">
+                        <label class="block text-xs font-bold text-gray-700 mb-1.5">Posisi</label>
+                        <select id="filter-role" onchange="renderTable()" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="">Semua Posisi</option>
+                        </select>
+                    </div>
+                    <div class="flex-grow min-w-[150px]">
+                        <label class="block text-xs font-bold text-gray-700 mb-1.5">Departemen</label>
+                        <select id="filter-dept" onchange="renderTable()" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="">Semua Departemen</option>
+                        </select>
+                    </div>
+                    <div class="flex-grow min-w-[150px]">
+                        <label class="block text-xs font-bold text-gray-700 mb-1.5">Entitas</label>
+                        <select id="filter-entity" onchange="renderTable()" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="">Semua Entitas</option>
+                        </select>
+                    </div>
+                    <div class="flex-grow min-w-[150px]">
+                        <label class="block text-xs font-bold text-gray-700 mb-1.5">Progress</label>
+                        <select id="filter-progress" onchange="renderTable()" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="">Semua Progress</option>
+                            <option value="0-25">0% - 25%</option>
+                            <option value="26-50">26% - 50%</option>
+                            <option value="51-75">51% - 75%</option>
+                            <option value="76-100">76% - 100%</option>
+                            <option value="terminated">Diberhentikan / Cancel</option>
+                        </select>
+                    </div>
+                    <div>
+                        <button onclick="resetFilters()" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-sm h-[38px] flex items-center gap-2">
+                            <i class="fa-solid fa-rotate-right"></i> Reset
+                        </button>
+                    </div>
+                </div>
 
-                    <!-- Kolom Kanan: List Template -->
-                    <div class="lg:col-span-2">
-                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                            <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Daftar Item Administratif Saat Ini</h3>
-                            <div id="admin-template-list" class="space-y-4">
-                                <!-- Rendered by JS -->
+                <!-- Table Card -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[1000px]">
+                            <thead>
+                                <tr class="bg-slate-50/80 border-b border-gray-200 text-xs uppercase tracking-wider text-gray-500">
+                                    <th class="p-4 font-semibold w-[25%]">Nama Karyawan</th>
+                                    <th class="p-4 font-semibold w-[20%]">Posisi & Dept</th>
+                                    <th class="p-4 font-semibold w-[15%]">Entitas</th>
+                                    <th class="p-4 font-semibold w-[15%]">Tgl Masuk</th>
+                                    <th class="p-4 font-semibold w-[15%]">Progress</th>
+                                    <th class="p-4 font-semibold w-[10%] text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="employee-table-body" class="divide-y divide-gray-100">
+                                <!-- Data Karyawan -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+
+            <!-- View: Calendar / Reminder -->
+            <main id="calendar-view" class="flex-grow max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full hidden">
+                <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Kalender Review Kinerja</h2>
+                        <p class="text-sm text-gray-500 mt-1">Jadwal review bulanan karyawan dalam tampilan kalender.</p>
+                    </div>
+                    <div class="flex items-center gap-4 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm">
+                        <button onclick="changeCalMonth(-1)" class="text-gray-500 hover:text-indigo-600 p-2 rounded-lg hover:bg-slate-50 transition-colors"><i class="fa-solid fa-chevron-left"></i></button>
+                        <h3 id="calendar-month-year" class="font-bold text-gray-800 min-w-[130px] text-center text-sm uppercase tracking-wide">Bulan Tahun</h3>
+                        <button onclick="changeCalMonth(1)" class="text-gray-500 hover:text-indigo-600 p-2 rounded-lg hover:bg-slate-50 transition-colors"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="grid grid-cols-7 bg-slate-50/80 border-b border-gray-200">
+                        <div class="p-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Sen</div>
+                        <div class="p-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Sel</div>
+                        <div class="p-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Rab</div>
+                        <div class="p-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Kam</div>
+                        <div class="p-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Jum</div>
+                        <div class="p-3 text-center text-xs font-bold text-indigo-500 uppercase tracking-wider">Sab</div>
+                        <div class="p-3 text-center text-xs font-bold text-red-500 uppercase tracking-wider">Min</div>
+                    </div>
+                    <div id="calendar-grid" class="grid grid-cols-7 auto-rows-[minmax(120px,auto)]">
+                        <!-- Hari-hari akan dirender oleh JS -->
+                    </div>
+                </div>
+            </main>
+
+            <!-- View: Admin / Pengaturan -->
+            <main id="admin-view" class="flex-grow max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">Pengaturan Administratif</h2>
+                    <p class="text-sm text-gray-500 mt-1">Kelola data master dan pengaturan sistem onboarding.</p>
+                </div>
+
+                <div class="flex gap-6 mb-8 border-b border-gray-200">
+                    <button onclick="switchAdminTab('template')" id="tab-btn-template" class="pb-3 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 transition-colors">Item Administratif</button>
+                    <button onclick="switchAdminTab('master')" id="tab-btn-master" class="pb-3 text-sm font-bold text-gray-500 border-b-2 border-transparent hover:text-gray-700 transition-colors">Role, Divisi & Entitas</button>
+                </div>
+
+                <div id="admin-tab-template" class="block">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-1">
+                            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sticky top-24">
+                                <h3 id="form-admin-title" class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Tambah Item Baru</h3>
+                                <form id="form-add-template" onsubmit="saveNewAdminTemplate(event)" class="space-y-4">
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-700 mb-1">Nama Item</label>
+                                        <input type="text" id="tmpl-label" required class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Contoh: Pembuatan Akun Email">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-700 mb-1">Instruksi Kerja</label>
+                                        <textarea id="tmpl-inst" required rows="3" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none resize-none" placeholder="Pisahkan dengan enter (baris baru)..."></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-700 mb-1">Policy / Kebijakan</label>
+                                        <textarea id="tmpl-pol" required rows="3" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none resize-none" placeholder="Pisahkan dengan enter (baris baru)..."></textarea>
+                                    </div>
+                                    <div class="pt-4 border-t border-gray-100 flex gap-3">
+                                        <button type="button" id="btn-cancel-edit" onclick="cancelEditTemplate()" class="hidden w-1/3 px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Batal</button>
+                                        <button type="submit" id="btn-submit-template" class="w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 flex items-center justify-center gap-2 transition-colors shadow-sm">
+                                            <i id="icon-submit-template" class="fa-solid fa-plus"></i> <span id="text-submit-template">Tambah Item</span>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-2">
+                            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                                <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Daftar Item Administratif Saat Ini</h3>
+                                <div id="admin-template-list" class="space-y-4"></div>
                             </div>
                         </div>
                     </div>
-
                 </div>
-            </div>
 
-            <!-- TAB 2: Master Data (Role, Divisi, Entitas) -->
-            <div id="admin-tab-master" class="hidden">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <!-- Master Posisi -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Master Posisi (Role)</h3>
-                        <form onsubmit="addMasterRole(event)" class="flex gap-3 mb-4">
-                            <input type="text" id="input-master-role" required class="flex-grow text-sm rounded-lg border border-gray-300 px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Posisi baru...">
-                            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium transition-colors shadow-sm"><i class="fa-solid fa-plus"></i></button>
-                        </form>
-                        <div id="list-master-role" class="space-y-2 max-h-[300px] overflow-y-auto pr-2"></div>
-                    </div>
-
-                    <!-- Master Departemen -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Master Departemen</h3>
-                        <form onsubmit="addMasterDept(event)" class="flex gap-3 mb-4">
-                            <input type="text" id="input-master-dept" required class="flex-grow text-sm rounded-lg border border-gray-300 px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Dept baru...">
-                            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium transition-colors shadow-sm"><i class="fa-solid fa-plus"></i></button>
-                        </form>
-                        <div id="list-master-dept" class="space-y-2 max-h-[300px] overflow-y-auto pr-2"></div>
-                    </div>
-
-                    <!-- Master Entitas -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Master Entitas</h3>
-                        <form onsubmit="addMasterEntity(event)" class="flex gap-3 mb-4">
-                            <input type="text" id="input-master-entity" required class="flex-grow text-sm rounded-lg border border-gray-300 px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Entitas baru...">
-                            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium transition-colors shadow-sm"><i class="fa-solid fa-plus"></i></button>
-                        </form>
-                        <div id="list-master-entity" class="space-y-2 max-h-[300px] overflow-y-auto pr-2"></div>
+                <div id="admin-tab-master" class="hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                            <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Master Posisi (Role)</h3>
+                            <form onsubmit="addMasterRole(event)" class="flex gap-3 mb-4">
+                                <input type="text" id="input-master-role" required class="flex-grow text-sm rounded-lg border border-gray-300 px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Posisi baru...">
+                                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium transition-colors shadow-sm"><i class="fa-solid fa-plus"></i></button>
+                            </form>
+                            <div id="list-master-role" class="space-y-2 max-h-[300px] overflow-y-auto pr-2"></div>
+                        </div>
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                            <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Master Departemen</h3>
+                            <form onsubmit="addMasterDept(event)" class="flex gap-3 mb-4">
+                                <input type="text" id="input-master-dept" required class="flex-grow text-sm rounded-lg border border-gray-300 px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Dept baru...">
+                                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium transition-colors shadow-sm"><i class="fa-solid fa-plus"></i></button>
+                            </form>
+                            <div id="list-master-dept" class="space-y-2 max-h-[300px] overflow-y-auto pr-2"></div>
+                        </div>
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                            <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Master Entitas</h3>
+                            <form onsubmit="addMasterEntity(event)" class="flex gap-3 mb-4">
+                                <input type="text" id="input-master-entity" required class="flex-grow text-sm rounded-lg border border-gray-300 px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Entitas baru...">
+                                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium transition-colors shadow-sm"><i class="fa-solid fa-plus"></i></button>
+                            </form>
+                            <div id="list-master-entity" class="space-y-2 max-h-[300px] overflow-y-auto pr-2"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-        </main>
+            </main>
 
-    </div> <!-- End Main Content -->
+        </div> <!-- End Main Content -->
+    </div> <!-- END APLIKASI UTAMA -->
 
     <!-- Modal: Detail Karyawan (Latar Belakang) -->
     <div id="detail-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 lg:p-8 bg-slate-900/60 backdrop-blur-sm opacity-0 hidden transition-opacity duration-300">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-full max-h-[90vh] flex flex-col scale-95 transition-transform duration-300 overflow-hidden relative">
-            
-            <!-- Header Modal -->
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white shrink-0">
                 <div class="flex items-center gap-4">
                     <img id="modal-avatar" src="" alt="Avatar" class="w-12 h-12 rounded-full bg-slate-100 object-cover border border-slate-200 shadow-sm">
@@ -339,11 +360,8 @@
                     </button>
                 </div>
             </div>
-
-            <!-- Body Modal (Dua Kolom) -->
             <div class="flex-grow overflow-y-auto bg-slate-50/50 p-6 relative">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- Kolom Kiri: Administratif -->
                     <div>
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
@@ -351,28 +369,20 @@
                             </h3>
                             <span class="text-xs font-medium bg-indigo-100 text-indigo-700 px-2 py-1 rounded">Klik item untuk detail</span>
                         </div>
-                        <div id="admin-list" class="space-y-3">
-                            <!-- Items List Rendered by JS -->
-                        </div>
+                        <div id="admin-list" class="space-y-3"></div>
                     </div>
-
-                    <!-- Kolom Kanan: Review -->
                     <div>
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
                                 <i class="fa-solid fa-clipboard-check text-emerald-500"></i> Review Kinerja
                             </h3>
                         </div>
-                        <div id="review-list" class="space-y-3">
-                            <!-- Items List Rendered by JS -->
-                        </div>
+                        <div id="review-list" class="space-y-3"></div>
                     </div>
                 </div>
             </div>
             
-            <!-- INNER CANVAS (DRAWER) UNTUK EDIT ITEM -->
             <div id="item-canvas" class="absolute inset-y-0 right-0 w-full md:w-[450px] bg-white shadow-[-10px_0_30px_rgba(0,0,0,0.1)] border-l border-gray-200 transform translate-x-full canvas-transition flex flex-col z-20 hidden">
-                <!-- Canvas Header -->
                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-slate-50 shrink-0">
                     <div>
                         <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-wider bg-indigo-100 px-2 py-0.5 rounded" id="canvas-type">Tipe</span>
@@ -382,10 +392,7 @@
                         <i class="fa-solid fa-chevron-right text-sm"></i>
                     </button>
                 </div>
-
-                <!-- Canvas Body -->
                 <div class="flex-grow overflow-y-auto p-6 space-y-6">
-                    <!-- Instruksi & Policy -->
                     <div class="bg-indigo-50/50 rounded-xl p-4 border border-indigo-100">
                         <div class="mb-4">
                             <h4 class="text-xs font-bold text-indigo-800 uppercase tracking-wider mb-2 flex items-center gap-1.5"><i class="fa-solid fa-list-check"></i> Instruksi Kerja</h4>
@@ -397,10 +404,7 @@
                             <ul id="canvas-policies" class="list-disc list-outside text-sm text-slate-700 ml-4 marker:text-emerald-500 space-y-1"></ul>
                         </div>
                     </div>
-
-                    <!-- Form Inputs -->
                     <div class="space-y-4">
-                        <!-- Status -->
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1.5">Status Penyelesaian</label>
                             <select id="input-status" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white shadow-sm font-medium">
@@ -410,13 +414,10 @@
                                 <option value="CANCELLED">Dibatalkan (Cancelled)</option>
                             </select>
                         </div>
-
-                        <!-- Tanggal (Admin: 1 Tgl, Review: 2 Tgl) -->
                         <div id="date-group-admin" class="hidden">
                             <label class="block text-xs font-bold text-gray-700 mb-1.5">Tanggal Penyelesaian</label>
                             <input type="date" id="input-date-single" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white shadow-sm">
                         </div>
-
                         <div id="date-group-review" class="grid grid-cols-2 gap-3 hidden">
                             <div>
                                 <label class="block text-[11px] font-bold text-gray-700 mb-1.5">Jadwal Review</label>
@@ -427,16 +428,12 @@
                                 <input type="date" id="input-date-actual" class="w-full text-sm rounded-lg border border-gray-300 px-2 py-2 focus:ring-2 focus:ring-emerald-500 shadow-sm">
                             </div>
                         </div>
-
-                        <!-- Catatan -->
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1.5">Catatan Tambahan</label>
                             <textarea id="input-notes" rows="3" placeholder="Tambahkan catatan jika diperlukan..." class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white shadow-sm resize-none"></textarea>
                         </div>
                     </div>
                 </div>
-
-                <!-- Canvas Footer -->
                 <div class="px-6 py-4 border-t border-gray-200 bg-white shrink-0 flex justify-end gap-3">
                     <button onclick="closeItemCanvas()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm">Batal</button>
                     <button onclick="saveItemDetail()" class="px-5 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm flex items-center gap-2">
@@ -444,8 +441,6 @@
                     </button>
                 </div>
             </div>
-            <!-- END INNER CANVAS -->
-            
         </div>
     </div>
 
@@ -474,22 +469,16 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-700 mb-1">Posisi (Role)</label>
-                        <select id="add-role" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <!-- Diisi otomatis oleh JS -->
-                        </select>
+                        <select id="add-role" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></select>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-700 mb-1">Departemen</label>
-                        <select id="add-dept" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <!-- Diisi otomatis oleh JS -->
-                        </select>
+                        <select id="add-dept" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></select>
                     </div>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-700 mb-1">Entitas Perusahaan</label>
-                    <select id="add-entity" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
-                        <!-- Diisi otomatis oleh JS -->
-                    </select>
+                    <select id="add-entity" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></select>
                 </div>
                 <div class="pt-4 border-t border-gray-100 flex justify-end gap-3">
                     <button type="button" onclick="closeAddModal()" class="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">Batal</button>
@@ -524,22 +513,16 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-700 mb-1">Posisi (Role)</label>
-                        <select id="edit-role" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <!-- Diisi otomatis oleh JS -->
-                        </select>
+                        <select id="edit-role" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></select>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-700 mb-1">Departemen</label>
-                        <select id="edit-dept" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <!-- Diisi otomatis oleh JS -->
-                        </select>
+                        <select id="edit-dept" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></select>
                     </div>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-700 mb-1">Entitas Perusahaan</label>
-                    <select id="edit-entity" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
-                        <!-- Diisi otomatis oleh JS -->
-                    </select>
+                    <select id="edit-entity" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></select>
                 </div>
                 <div class="pt-4 border-t border-gray-100 flex justify-end gap-3">
                     <button type="button" onclick="closeEditEmployeeModal()" class="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">Batal</button>
@@ -573,7 +556,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-700 mb-1">Catatan Tambahan (Wajib)</label>
-                    <textarea id="term-notes" required rows="3" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-red-500 outline-none resize-none" placeholder="Masukkan detail alasan penyelesaian (Misal: Karyawan mengundurkan diri)..."></textarea>
+                    <textarea id="term-notes" required rows="3" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-red-500 outline-none resize-none" placeholder="Masukkan detail alasan penyelesaian..."></textarea>
                 </div>
                 <div class="pt-4 border-t border-gray-100 flex justify-end gap-3">
                     <button type="button" onclick="closeTerminateModal()" class="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">Batal</button>
@@ -594,6 +577,7 @@
 
     <!-- FIREBASE LIBRARIES -->
     <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth-compat.js"></script> <!-- Tambahan Auth -->
     <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
 
     <script>
@@ -608,9 +592,59 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        const auth = firebase.auth(); // Inisialisasi Auth
         // ----------------------------
 
-        // --- STREAMING_CHUNK:Initialize Data Structures ---
+        // --- SISTEM LOGIN (AUTHENTICATION) ---
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // Jika berhasil login, sembunyikan layar login, tampilkan aplikasi
+                document.getElementById('login-view').classList.add('hidden');
+                document.getElementById('app-view').classList.remove('hidden');
+                document.getElementById('app-view').classList.add('flex');
+                
+                // Baru panggil data dari database SETELAH dipastikan login[cite: 2]
+                loadDataFromFirebase();
+            } else {
+                // Jika belum login / di-logout, tampilkan layar login
+                document.getElementById('login-view').classList.remove('hidden');
+                document.getElementById('app-view').classList.add('hidden');
+                document.getElementById('app-view').classList.remove('flex');
+                
+                // Hapus memori tabel agar aman
+                document.getElementById('employee-table-body').innerHTML = '';
+            }
+        });
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-pass').value;
+            const btn = document.getElementById('btn-login');
+            
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memeriksa...';
+            btn.disabled = true;
+
+            auth.signInWithEmailAndPassword(email, pass)
+                .then(() => {
+                    btn.innerHTML = 'Masuk Sistem';
+                    btn.disabled = false;
+                    document.getElementById('form-login').reset();
+                    showNotification("Berhasil Login!");
+                })
+                .catch((error) => {
+                    btn.innerHTML = 'Masuk Sistem';
+                    btn.disabled = false;
+                    alert("Gagal Login! Pastikan Email dan Kata Sandi benar.");
+                    console.error(error);
+                });
+        }
+
+        function handleLogout() {
+            auth.signOut().then(() => showNotification("Berhasil Keluar Sistem."));
+        }
+        // ------------------------------------
+
         let adminChecklistTemplate = [
             { 
                 id: 'data', 
@@ -646,16 +680,12 @@
             { id: 'review3', label: 'Review Bulan 3 (Final)', type: 'review', instructions: ["Siapkan form evaluasi final probation", "Minta rekomendasi atasan (Lulus/Tidak)"], policies: ["Menentukan kelanjutan kontrak atau pengangkatan karyawan tetap"] }
         ];
 
-        // Data karyawan sekarang dimuat dari Firebase
         let employees = [];
-
-        // State variables
         let currentEmployeeId = null;
         let currentEditingItemId = null;
         let currentEditingItemType = null; 
         let editingTemplateIndex = null; 
 
-        // State Master Data (Posisi & Departemen)
         let masterRoles = ["Staff", "Supervisor", "Manager"];
         let masterDepartments = ["Operasional", "Sales Marketing", "Finance", "Engineering", "HR"];
         let masterEntities = ["PT Alpha Jaya", "PT Beta Teknologi", "CV Gamma Sentosa"];
@@ -663,24 +693,22 @@
         let currentEditTableEmpId = null; 
         let currentCalDate = new Date(); 
 
-        // --- FUNGSI LOAD DATA DARI FIREBASE ---
         async function loadDataFromFirebase() {
             try {
                 const snapshot = await db.collection("employees").get();
                 employees = snapshot.docs.map(doc => {
                     let data = doc.data();
-                    data.id = doc.id; // Menggunakan String ID dari Firebase
+                    data.id = doc.id; 
                     return data;
                 });
                 renderTable();
                 renderCalendar();
             } catch (error) {
-                console.error("Error mengambil data dari Firebase:", error);
-                showNotification("Gagal memuat data karyawan!");
+                console.error("Error mengambil data:", error);
+                showNotification("Gagal memuat data dari Database!");
             }
         }
 
-        // --- STREAMING_CHUNK:Core UI Functions (Sidebar, Navigation) ---
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebar-overlay');
@@ -736,7 +764,6 @@
                 .then(() => showNotification(`Link ${docType} disalin!`));
         }
 
-        // --- STREAMING_CHUNK:Helper Functions (Status, Calculations) ---
         function formatDateUI(dateStr) {
             if (!dateStr) return '';
             const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
@@ -798,7 +825,6 @@
             return Math.round((doneCount / allItems.length) * 100);
         }
 
-        // --- STREAMING_CHUNK:Dashboard Table Logic ---
         function renderTable() {
             const tbody = document.getElementById('employee-table-body');
             tbody.innerHTML = '';
@@ -900,7 +926,6 @@
             renderTable();
         }
 
-        // --- STREAMING_CHUNK:Add Employee Logic (Saves to Firebase) ---
         function openAddModal() {
             const m = document.getElementById('add-modal');
             m.classList.remove('hidden');
@@ -931,7 +956,6 @@
             });
             
             try {
-                // Simpan ke Firebase
                 const docRef = await db.collection("employees").add(newEmp);
                 newEmp.id = docRef.id;
                 employees.push(newEmp);
@@ -995,7 +1019,6 @@
             }
         }
 
-        // --- STREAMING_CHUNK:Terminate Onboarding Logic (Saves to Firebase) ---
         function openTerminateModal() {
             if(!currentEmployeeId) return;
             document.getElementById('form-terminate').reset();
@@ -1064,7 +1087,6 @@
             }
         }
 
-        // --- STREAMING_CHUNK:Modal Detail & Canvas Logic ---
         function openDetailModal(empId) {
             currentEmployeeId = empId;
             const emp = employees.find(e => e.id === empId);
@@ -1161,7 +1183,6 @@
             `;
         }
 
-        // --- STREAMING_CHUNK:Inner Canvas (Drawer) Logic ---
         function openItemCanvas(itemId, itemType) {
             currentEditingItemId = itemId;
             currentEditingItemType = itemType;
@@ -1215,7 +1236,6 @@
             }
 
             try {
-                // Update ke Firebase
                 await db.collection("employees").doc(emp.id).update({
                     checklist: emp.checklist
                 });
@@ -1229,7 +1249,6 @@
             }
         }
 
-        // --- STREAMING_CHUNK:Calendar View Logic ---
         function changeCalMonth(offset) {
             currentCalDate.setMonth(currentCalDate.getMonth() + offset);
             renderCalendar();
@@ -1313,18 +1332,15 @@
             }
         }
 
-        // --- STREAMING_CHUNK:Admin Settings Logic ---
         function switchAdminTab(tab) {
             if(tab === 'template') {
                 document.getElementById('admin-tab-template').classList.remove('hidden');
                 document.getElementById('admin-tab-master').classList.add('hidden');
-                
                 document.getElementById('tab-btn-template').className = "pb-3 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 transition-colors";
                 document.getElementById('tab-btn-master').className = "pb-3 text-sm font-bold text-gray-500 border-b-2 border-transparent hover:text-gray-700 transition-colors";
             } else {
                 document.getElementById('admin-tab-template').classList.add('hidden');
                 document.getElementById('admin-tab-master').classList.remove('hidden');
-                
                 document.getElementById('tab-btn-template').className = "pb-3 text-sm font-bold text-gray-500 border-b-2 border-transparent hover:text-gray-700 transition-colors";
                 document.getElementById('tab-btn-master').className = "pb-3 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 transition-colors";
             }
@@ -1523,11 +1539,9 @@
             showNotification('Item berhasil dihapus.');
         }
 
-        // --- Init Panggilan Pertama Kali ---
         document.addEventListener('DOMContentLoaded', () => {
             populateDropdowns(); 
-            // Kita panggil fungsi ambil data dari Firebase disini
-            loadDataFromFirebase();
+            // Data akan diload saat berhasil login
         });
     </script>
 </body>
