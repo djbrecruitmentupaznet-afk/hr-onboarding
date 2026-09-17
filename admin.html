@@ -250,6 +250,7 @@
     <!-- FIREBASE LIBRARIES -->
     <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
 
     <script>
         // --- KONFIGURASI FIREBASE ---
@@ -263,7 +264,47 @@
         };
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
+        const db = firebase.firestore();
         // ----------------------------
+
+        // Referensi Database untuk Master Data
+        const masterDataRef = db.collection('settings').doc('masterData');
+
+        // Fungsi Load Master Data dari Firestore
+        async function loadMasterData() {
+            try {
+                const doc = await masterDataRef.get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data.adminChecklistTemplate) adminChecklistTemplate = data.adminChecklistTemplate;
+                    if (data.masterRoles) masterRoles = data.masterRoles;
+                    if (data.masterDepartments) masterDepartments = data.masterDepartments;
+                    if (data.masterEntities) masterEntities = data.masterEntities;
+                } else {
+                    // Jika belum ada dokumen masterData, simpan data default
+                    await saveMasterData();
+                }
+                renderAdminTemplates(); // Render UI setelah data termuat
+            } catch (error) {
+                console.error("Error loading master data:", error);
+                showNotification("Gagal memuat data pengaturan dari database!");
+            }
+        }
+
+        // Fungsi Save Master Data ke Firestore
+        async function saveMasterData() {
+            try {
+                await masterDataRef.set({
+                    adminChecklistTemplate: adminChecklistTemplate,
+                    masterRoles: masterRoles,
+                    masterDepartments: masterDepartments,
+                    masterEntities: masterEntities
+                });
+            } catch (error) {
+                console.error("Error saving master data:", error);
+                showNotification("Gagal menyimpan perubahan ke database!");
+            }
+        }
 
         // --- SISTEM LOGIN (AUTHENTICATION) ---
         auth.onAuthStateChanged((user) => {
@@ -273,7 +314,7 @@
                 document.getElementById('app-view').classList.add('flex');
                 
                 // Render form & data khusus admin
-                renderAdminTemplates();
+                loadMasterData();
             } else {
                 document.getElementById('login-view').classList.remove('hidden');
                 document.getElementById('app-view').classList.add('hidden');
@@ -349,7 +390,7 @@
             polQuill = new Quill('#tmpl-pol-editor', quillOptions);
         });
 
-        // --- DATA MASTER & TEMPLATE (Diadaptasi agar mendukug HTML) ---
+        // --- DATA MASTER & TEMPLATE DEFAULTS ---
         let adminChecklistTemplate = [
             { 
                 id: 'data', 
@@ -471,7 +512,7 @@
         }
 
         // Simpan Form (Baik Tambah Baru maupun Update)
-        function saveNewAdminTemplate(e) {
+        async function saveNewAdminTemplate(e) {
             e.preventDefault();
             const label = document.getElementById('tmpl-label').value;
             
@@ -503,13 +544,20 @@
                 showNotification('Item Administratif berhasil ditambahkan!');
             }
 
+            // Sync ke Firestore
+            await saveMasterData();
+            
             renderAdminTemplates();
             cancelEditTemplate(); 
         }
 
-        function deleteAdminTemplate(index) {
+        async function deleteAdminTemplate(index) {
             if(confirm("Yakin ingin menghapus item ini?")) {
                 adminChecklistTemplate.splice(index, 1);
+                
+                // Sync ke Firestore
+                await saveMasterData();
+                
                 renderAdminTemplates();
                 showNotification('Item berhasil dihapus.');
             }
@@ -549,44 +597,59 @@
             }
         }
 
-        function addMasterRole(e) {
+        async function addMasterRole(e) {
             e.preventDefault();
             const input = document.getElementById('input-master-role');
             const val = input.value.trim();
             if (val && !masterRoles.includes(val)) {
                 masterRoles.push(val);
+                await saveMasterData(); // Sync ke Firestore
                 input.value = '';
                 renderMasterData();
                 showNotification("Posisi baru berhasil ditambahkan.");
             }
         }
-        function deleteMasterRole(index) { masterRoles.splice(index, 1); renderMasterData(); }
+        async function deleteMasterRole(index) { 
+            masterRoles.splice(index, 1); 
+            await saveMasterData(); // Sync ke Firestore
+            renderMasterData(); 
+        }
 
-        function addMasterDept(e) {
+        async function addMasterDept(e) {
             e.preventDefault();
             const input = document.getElementById('input-master-dept');
             const val = input.value.trim();
             if (val && !masterDepartments.includes(val)) {
                 masterDepartments.push(val);
+                await saveMasterData(); // Sync ke Firestore
                 input.value = '';
                 renderMasterData();
                 showNotification("Departemen baru berhasil ditambahkan.");
             }
         }
-        function deleteMasterDept(index) { masterDepartments.splice(index, 1); renderMasterData(); }
+        async function deleteMasterDept(index) { 
+            masterDepartments.splice(index, 1); 
+            await saveMasterData(); // Sync ke Firestore
+            renderMasterData(); 
+        }
 
-        function addMasterEntity(e) {
+        async function addMasterEntity(e) {
             e.preventDefault();
             const input = document.getElementById('input-master-entity');
             const val = input.value.trim();
             if (val && !masterEntities.includes(val)) {
                 masterEntities.push(val);
+                await saveMasterData(); // Sync ke Firestore
                 input.value = '';
                 renderMasterData();
                 showNotification("Entitas baru berhasil ditambahkan.");
             }
         }
-        function deleteMasterEntity(index) { masterEntities.splice(index, 1); renderMasterData(); }
+        async function deleteMasterEntity(index) { 
+            masterEntities.splice(index, 1); 
+            await saveMasterData(); // Sync ke Firestore
+            renderMasterData(); 
+        }
     </script>
 </body>
 </html>
