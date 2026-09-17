@@ -7,11 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Tambahan: Pustaka Quill.js untuk Editor Teks ala MS Word -->
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
-
     <script>
         tailwind.config = {
             theme: {
@@ -31,32 +26,6 @@
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         .sidebar-transition { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .canvas-transition { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-
-        /* Styling tambahan untuk Rich Text Editor */
-        .quill-editor-container .ql-toolbar {
-            border-top-left-radius: 0.5rem;
-            border-top-right-radius: 0.5rem;
-            border-color: #d1d5db;
-            background-color: #f8fafc;
-        }
-        .quill-editor-container .ql-container {
-            border-bottom-left-radius: 0.5rem;
-            border-bottom-right-radius: 0.5rem;
-            border-color: #d1d5db;
-            background-color: #ffffff;
-            min-height: 120px;
-            font-size: 0.875rem;
-        }
-        .quill-editor-container.ring-active {
-            box-shadow: 0 0 0 2px #6366f1;
-            border-color: #6366f1;
-        }
-        /* Style untuk menampilkan HTML dari editor */
-        .quill-content ul { list-style-type: disc !important; padding-left: 1.5rem !important; margin-top: 0.25rem; margin-bottom: 0.5rem; }
-        .quill-content ol { list-style-type: decimal !important; padding-left: 1.5rem !important; margin-top: 0.25rem; margin-bottom: 0.5rem; }
-        .quill-content p { margin-bottom: 0.25rem; }
-        .quill-content strong { font-weight: 700; }
-        .quill-content em { font-style: italic; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
@@ -148,6 +117,7 @@
                             <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center border border-indigo-200">
                                 <span class="text-indigo-700 font-bold text-sm">HR</span>
                             </div>
+                            <!-- Tombol Keluar (Logout) -->
                             <button onclick="handleLogout()" class="flex items-center gap-2 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 px-3 py-1.5 rounded-lg transition-colors shadow-sm ml-2">
                                 <i class="fa-solid fa-right-from-bracket"></i> <span class="hidden sm:inline">Keluar</span>
                             </button>
@@ -307,15 +277,11 @@
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-gray-700 mb-1">Instruksi Kerja</label>
-                                        <div class="quill-editor-container rounded-lg">
-                                            <div id="tmpl-inst-editor"></div>
-                                        </div>
+                                        <textarea id="tmpl-inst" required rows="3" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none resize-none" placeholder="Pisahkan dengan enter (baris baru)..."></textarea>
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-gray-700 mb-1">Policy / Kebijakan</label>
-                                        <div class="quill-editor-container rounded-lg">
-                                            <div id="tmpl-pol-editor"></div>
-                                        </div>
+                                        <textarea id="tmpl-pol" required rows="3" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none resize-none" placeholder="Pisahkan dengan enter (baris baru)..."></textarea>
                                     </div>
                                     <div class="pt-4 border-t border-gray-100 flex gap-3">
                                         <button type="button" id="btn-cancel-edit" onclick="cancelEditTemplate()" class="hidden w-1/3 px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Batal</button>
@@ -430,12 +396,12 @@
                     <div class="bg-indigo-50/50 rounded-xl p-4 border border-indigo-100">
                         <div class="mb-4">
                             <h4 class="text-xs font-bold text-indigo-800 uppercase tracking-wider mb-2 flex items-center gap-1.5"><i class="fa-solid fa-list-check"></i> Instruksi Kerja</h4>
-                            <div id="canvas-instructions-container" class="quill-content"></div>
+                            <ul id="canvas-instructions" class="list-decimal list-outside text-sm text-slate-700 ml-4 marker:text-indigo-400 marker:font-semibold space-y-1"></ul>
                         </div>
                         <div class="border-t border-indigo-200/60 my-3"></div>
                         <div>
                             <h4 class="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-2 flex items-center gap-1.5"><i class="fa-solid fa-shield-halved"></i> Policy</h4>
-                            <div id="canvas-policies-container" class="quill-content"></div>
+                            <ul id="canvas-policies" class="list-disc list-outside text-sm text-slate-700 ml-4 marker:text-emerald-500 space-y-1"></ul>
                         </div>
                     </div>
                     <div class="space-y-4">
@@ -478,12 +444,129 @@
         </div>
     </div>
 
-    <!-- Modal Tambah/Edit Karyawan dan Terminate Karyawan tetap sama -->
-    <!-- (Untuk menghemat space saya tidak copy paste penuh UI ini, tapi anggap tidak ada perubahan pada Modal Tambah/Edit/Terminate ini) -->
-    
-    <!-- (Abaikan form yang sudah dipendekkan ini untuk fokus pada fungsionalitas Javascript, UI diatas sudah disesuaikan persis seperti kode asli) -->
-    
-    <!-- Bagian Notifikasi dll -->
+    <!-- Modal: Tambah Karyawan -->
+    <div id="add-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm opacity-0 hidden transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg scale-95 transition-transform duration-300 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-slate-50">
+                <h3 class="text-lg font-bold text-gray-900">Tambah Karyawan Baru</h3>
+                <button onclick="closeAddModal()" class="text-gray-400 hover:text-gray-700"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="form-add-emp" onsubmit="submitNewEmployee(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Nama Lengkap</label>
+                    <input type="text" id="add-name" required class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Email / Kontak</label>
+                        <input type="text" id="add-email" required class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Email atau No. HP">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Tanggal Masuk</label>
+                        <input type="date" id="add-start" required class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Posisi (Role)</label>
+                        <select id="add-role" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Departemen</label>
+                        <select id="add-dept" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Entitas Perusahaan</label>
+                    <select id="add-entity" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></select>
+                </div>
+                <div class="pt-4 border-t border-gray-100 flex justify-end gap-3">
+                    <button type="button" onclick="closeAddModal()" class="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">Batal</button>
+                    <button type="submit" class="px-5 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">Tambah Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Edit Karyawan Dasar -->
+    <div id="edit-emp-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm opacity-0 hidden transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg scale-95 transition-transform duration-300 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-slate-50">
+                <h3 class="text-lg font-bold text-gray-900">Edit Data Karyawan</h3>
+                <button onclick="closeEditEmployeeModal()" class="text-gray-400 hover:text-gray-700"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="form-edit-emp" onsubmit="submitEditEmployee(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Nama Lengkap</label>
+                    <input type="text" id="edit-name" required class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Email / Kontak</label>
+                        <input type="text" id="edit-email" required class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Email atau No. HP">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Tanggal Masuk</label>
+                        <input type="date" id="edit-start" required class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Posisi (Role)</label>
+                        <select id="edit-role" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Departemen</label>
+                        <select id="edit-dept" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Entitas Perusahaan</label>
+                    <select id="edit-entity" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></select>
+                </div>
+                <div class="pt-4 border-t border-gray-100 flex justify-end gap-3">
+                    <button type="button" onclick="closeEditEmployeeModal()" class="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">Batal</button>
+                    <button type="submit" class="px-5 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Selesaikan Onboarding -->
+    <div id="terminate-modal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm opacity-0 hidden transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md scale-95 transition-transform duration-300 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 bg-red-50 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-triangle-exclamation text-red-500 text-xl"></i>
+                    <h3 class="text-lg font-bold text-red-700">Selesaikan Onboarding</h3>
+                </div>
+                <button onclick="closeTerminateModal()" class="text-red-400 hover:text-red-700 p-1 rounded-full"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="form-terminate" onsubmit="submitTerminate(event)" class="p-6 space-y-4">
+                <p class="text-xs text-gray-600 mb-2">Aksi ini akan menandai proses onboarding karyawan sebagai selesai (100%) dengan status pemberhentian/pembatalan.</p>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Alasan Selesai</label>
+                    <select id="term-reason" required class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-red-500 outline-none">
+                        <option value="" disabled selected>Pilih Alasan...</option>
+                        <option value="Tidak Lanjut OJT">Tidak Lanjut OJT</option>
+                        <option value="Tidak Lanjut Probation">Tidak Lanjut Probation</option>
+                        <option value="Diberhentikan OJT">Diberhentikan OJT</option>
+                        <option value="Diberhentikan Probation">Diberhentikan Probation</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Catatan Tambahan (Wajib)</label>
+                    <textarea id="term-notes" required rows="3" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-red-500 outline-none resize-none" placeholder="Masukkan detail alasan penyelesaian..."></textarea>
+                </div>
+                <div class="pt-4 border-t border-gray-100 flex justify-end gap-3">
+                    <button type="button" onclick="closeTerminateModal()" class="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">Batal</button>
+                    <button type="submit" class="px-5 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">Konfirmasi Selesai</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
     <div id="notification" class="fixed bottom-6 right-6 max-w-sm bg-gray-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-start gap-3 transform translate-y-20 opacity-0 transition-all duration-300 z-[70] border border-gray-700">
         <i class="fa-solid fa-circle-check text-green-400 mt-1"></i>
         <div>
@@ -494,7 +577,7 @@
 
     <!-- FIREBASE LIBRARIES -->
     <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth-compat.js"></script> <!-- Tambahan Auth -->
     <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
 
     <script>
@@ -509,20 +592,26 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        const auth = firebase.auth();
+        const auth = firebase.auth(); // Inisialisasi Auth
         // ----------------------------
 
         // --- SISTEM LOGIN (AUTHENTICATION) ---
         auth.onAuthStateChanged((user) => {
             if (user) {
+                // Jika berhasil login, sembunyikan layar login, tampilkan aplikasi
                 document.getElementById('login-view').classList.add('hidden');
                 document.getElementById('app-view').classList.remove('hidden');
                 document.getElementById('app-view').classList.add('flex');
+                
+                // Baru panggil data dari database SETELAH dipastikan login[cite: 2]
                 loadDataFromFirebase();
             } else {
+                // Jika belum login / di-logout, tampilkan layar login
                 document.getElementById('login-view').classList.remove('hidden');
                 document.getElementById('app-view').classList.add('hidden');
                 document.getElementById('app-view').classList.remove('flex');
+                
+                // Hapus memori tabel agar aman
                 document.getElementById('employee-table-body').innerHTML = '';
             }
         });
@@ -554,41 +643,41 @@
         function handleLogout() {
             auth.signOut().then(() => showNotification("Berhasil Keluar Sistem."));
         }
+        // ------------------------------------
 
-        // --- RICH TEXT EDITOR SETUP ---
-        let instQuill, polQuill;
-        document.addEventListener('DOMContentLoaded', () => {
-            const quillOptions = {
-                theme: 'snow',
-                modules: {
-                    toolbar: [
-                        ['bold', 'italic', 'underline'], 
-                        [{ 'color': [] }, { 'background': [] }],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        ['clean']
-                    ]
-                }
-            };
-            instQuill = new Quill('#tmpl-inst-editor', quillOptions);
-            polQuill = new Quill('#tmpl-pol-editor', quillOptions);
-        });
-
-        // Konversi Data Hardcode ke Format HTML untuk Kompatibilitas
         let adminChecklistTemplate = [
             { 
                 id: 'data', 
                 label: 'Pengumpulan Data Diri', 
                 type: 'admin',
-                instructions: "<ul><li>Minta Foto KK (Kirim Ke Nomor Recruitment)</li><li>Minta Karyawan Mengisi Di Data Karyawan</li><li>Pastikan Pengisian Data Karyawan Sesuai Standar HR</li><li>Isi juga Data Karyawan di Sheet Data Karyawan (Untuk Data Kredo Tanggal Lahir / NIP)</li></ul>",
-                policies: "<ul><li>Setiap karyawan baru wajib mengisi Data Karyawan di Presensi, HR memastikan keabsahan data presensi tersebut.</li><li>HR memastikan KK telah diupload di Google Drive</li><li>Kelengkapan Data Diri di Presensi WAJIB diisi ketika karyawan pertama kali masuk (OJT maupun Probation)</li></ul>"
+                instructions: [
+                    "Minta Foto KK (Kirim Ke Nomor Recruitment)",
+                    `Minta Karyawan Mengisi Di Data Karyawan <button type="button" class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2 py-0.5 rounded transition-colors ml-1 shadow-sm" onclick="generateLink(event, 'Form Data Karyawan')"><i class="fa-solid fa-link"></i> Generate Link</button>`,
+                    "Pastikan Pengisian Data Karyawan Sesuai Standar HR",
+                    "Isi juga Data Karyawan di Sheet Data Karyawan (Untuk Data Kredo Tanggal Lahir / NIP)"
+                ],
+                policies: [
+                    "Setiap karyawan baru wajib mengisi Data Karyawan di Presensi, HR memastikan keabsahan data presensi tersebut.",
+                    "HR memastikan KK telah diupload di Google Drive",
+                    "Kelengkapan Data Diri di Presensi WAJIB diisi ketika karyawan pertama kali masuk (OJT maupun Probation)"
+                ]
             },
-            { id: 'kontrak', label: 'Tanda Tangan Kontrak', type: 'admin', instructions: "<ul><li>Siapkan draf kontrak sesuai posisi</li><li>Jadwalkan sesi tanda tangan dengan karyawan</li><li>Arsipkan kontrak fisik dan digital</li></ul>", policies: "<ul><li>Kontrak harus ditandatangani paling lambat hari pertama kerja</li><li>Salinan kontrak wajib diberikan kepada karyawan</li></ul>" }
-            // Item hardcode lainnya bisa dibiarkan menggunakan array seperti aslinya, karena kita buat logic formatToHtml()
+            { id: 'kontrak', label: 'Tanda Tangan Kontrak', type: 'admin', instructions: ["Siapkan draf kontrak sesuai posisi", "Jadwalkan sesi tanda tangan dengan karyawan", "Arsipkan kontrak fisik dan digital"], policies: ["Kontrak harus ditandatangani paling lambat hari pertama kerja", "Salinan kontrak wajib diberikan kepada karyawan"] },
+            { id: 'bast', label: 'BAST Fasilitas Kerja', type: 'admin', instructions: ["Siapkan form BAST", "Serahkan fasilitas (Laptop, dll)"], policies: ["Form BAST wajib ditandatangani kedua belah pihak"] },
+            { id: 'email', label: 'Pembuatan Akun Email', type: 'admin', instructions: ["Request ke IT untuk pembuatan email perusahaan"], policies: ["Format email: nama.depan@perusahaan.com"] },
+            { id: 'presensi', label: 'Akses Sistem Presensi', type: 'admin', instructions: ["Daftarkan sidik jari/wajah di mesin", "Berikan akses aplikasi HRIS"], policies: ["Wajib aktif di hari pertama kerja"] },
+            { id: 'cust_panel', label: 'Akses Customer Panel', type: 'admin', instructions: ["Request akses ke tim sistem untuk role terkait"], policies: ["Hanya untuk divisi Operasional dan Sales"] },
+            { id: 'materi', label: 'Pemberian Materi Onboarding', type: 'admin', instructions: ["Kirimkan PDF Company Profile & Peraturan Perusahaan"], policies: ["Wajib dibaca dan dipahami dalam minggu pertama"] },
+            { id: 'kredo', label: 'Sosialisasi Kredo/Budaya', type: 'admin', instructions: ["Jadwalkan sesi sosialisasi budaya kerja dengan HR"], policies: ["Merupakan bagian dari penilaian culture fit"] },
+            { id: 'seragam', label: 'Pengambilan Seragam', type: 'admin', instructions: ["Ukur ukuran baju", "Serahkan seragam jika stok tersedia"], policies: ["Diberikan setelah masa probation selesai atau sesuai kebijakan divisi"] },
+            { id: 'id_card', label: 'Pembuatan ID Card', type: 'admin', instructions: ["Minta pas foto terbaru", "Cetak ID Card"], policies: ["Wajib dipakai selama berada di area kantor"] },
+            { id: 'masuk_grup', label: 'Masuk Grup Komunikasi', type: 'admin', instructions: ["Masukkan nomor WA ke grup divisi dan grup general"], policies: ["Jaga etika komunikasi di dalam grup perusahaan"] }
         ];
 
         let baseReviewChecklistTemplate = [
             { id: 'review1', label: 'Review Bulan 1', type: 'review', instructions: ["Jadwalkan meeting 1-on-1 dengan atasan langsung", "Siapkan form evaluasi bulan pertama"], policies: ["Fokus pada adaptasi lingkungan dan pemahaman tugas dasar"] },
-            { id: 'review2', label: 'Review Bulan 2', type: 'review', instructions: ["Jadwalkan meeting 1-on-1", "Kumpulkan feedback dari rekan tim"], policies: ["Fokus pada pencapaian target awal dan kemandirian"] }
+            { id: 'review2', label: 'Review Bulan 2', type: 'review', instructions: ["Jadwalkan meeting 1-on-1", "Kumpulkan feedback dari rekan tim"], policies: ["Fokus pada pencapaian target awal dan kemandirian"] },
+            { id: 'review3', label: 'Review Bulan 3 (Final)', type: 'review', instructions: ["Siapkan form evaluasi final probation", "Minta rekomendasi atasan (Lulus/Tidak)"], policies: ["Menentukan kelanjutan kontrak atau pengangkatan karyawan tetap"] }
         ];
 
         let employees = [];
@@ -604,42 +693,656 @@
         let currentEditTableEmpId = null; 
         let currentCalDate = new Date(); 
 
-        async function loadDataFromFirebase() { /* Fungsi API Firebase Sama Persis */ }
-        function toggleSidebar() { /* UI Sama Persis */ }
-        function switchView(viewName) { /* UI Sama Persis */
+        async function loadDataFromFirebase() {
+            try {
+                const snapshot = await db.collection("employees").get();
+                employees = snapshot.docs.map(doc => {
+                    let data = doc.data();
+                    data.id = doc.id; 
+                    return data;
+                });
+                renderTable();
+                renderCalendar();
+            } catch (error) {
+                console.error("Error mengambil data:", error);
+                showNotification("Gagal memuat data dari Database!");
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        }
+
+        function switchView(viewName) {
             document.getElementById('dashboard-view').classList.add('hidden');
             document.getElementById('calendar-view').classList.add('hidden');
             document.getElementById('admin-view').classList.add('hidden');
+            
+            document.getElementById('menu-btn-dashboard').className = "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors";
+            document.getElementById('menu-btn-calendar').className = "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors";
+            document.getElementById('menu-btn-admin').className = "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors";
+
             if(viewName === 'dashboard') {
                 document.getElementById('dashboard-view').classList.remove('hidden');
-                // Panggil render dll...
-            } else if(viewName === 'admin') {
+                document.getElementById('topbar-title').innerText = "Monitoring Onboarding";
+                document.getElementById('menu-btn-dashboard').className = "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors bg-indigo-600 text-white";
+                renderTable();
+            } else if(viewName === 'calendar') {
+                document.getElementById('calendar-view').classList.remove('hidden');
+                document.getElementById('topbar-title').innerText = "Kalender Review";
+                document.getElementById('menu-btn-calendar').className = "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors bg-indigo-600 text-white";
+                renderCalendar();
+            } else {
                 document.getElementById('admin-view').classList.remove('hidden');
+                document.getElementById('topbar-title').innerText = "Pengaturan Admin";
+                document.getElementById('menu-btn-admin').className = "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors bg-indigo-600 text-white";
                 renderAdminTemplates();
             }
+            if(window.innerWidth < 1024) toggleSidebar();
         }
-        function showNotification(msg) { /* UI Sama Persis */ 
+
+        function showNotification(msg) {
             const notif = document.getElementById('notification');
             document.getElementById('notification-text').innerText = msg;
             notif.classList.remove('translate-y-20', 'opacity-0');
             setTimeout(() => notif.classList.add('translate-y-20', 'opacity-0'), 3000);
         }
 
-        // Fungsi Helper untuk Parsing HTML jika format aslinya Array
-        const formatToHtml = (content) => {
-            if (Array.isArray(content)) {
-                return `<ul>` + content.map(i => `<li>${i}</li>`).join('') + `</ul>`;
+        function generateLink(event, docType) {
+            event.stopPropagation();
+            navigator.clipboard.writeText(`https://hr.corp.com/form/${docType.replace(/\s/g,'').toLowerCase()}`)
+                .then(() => showNotification(`Link ${docType} disalin!`));
+        }
+
+        function formatDateUI(dateStr) {
+            if (!dateStr) return '';
+            const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            const [year, month, day] = dateStr.split('-');
+            if (!year || !month || !day) return dateStr;
+            return `${parseInt(day)} ${months[parseInt(month) - 1]} ${year}`;
+        }
+
+        function populateDropdowns() {
+            const filterRole = document.getElementById('filter-role');
+            const filterDept = document.getElementById('filter-dept');
+            const filterEntity = document.getElementById('filter-entity');
+            
+            if(filterRole) filterRole.innerHTML = '<option value="">Semua Posisi</option>' + masterRoles.map(r => `<option value="${r}">${r}</option>`).join('');
+            if(filterDept) filterDept.innerHTML = '<option value="">Semua Departemen</option>' + masterDepartments.map(d => `<option value="${d}">${d}</option>`).join('');
+            if(filterEntity) filterEntity.innerHTML = '<option value="">Semua Entitas</option>' + masterEntities.map(e => `<option value="${e}">${e}</option>`).join('');
+
+            const roleOpts = masterRoles.map(r => `<option value="${r}">${r}</option>`).join('');
+            const deptOpts = masterDepartments.map(d => `<option value="${d}">${d}</option>`).join('');
+            const entityOpts = masterEntities.map(e => `<option value="${e}">${e}</option>`).join('');
+
+            ['add-role', 'edit-role'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerHTML = roleOpts; });
+            ['add-dept', 'edit-dept'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerHTML = deptOpts; });
+            ['add-entity', 'edit-entity'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerHTML = entityOpts; });
+        }
+
+        function getStatusInfo(statusVal) {
+            switch(statusVal) {
+                case 'DONE': return { text: 'Selesai', color: 'text-green-700 bg-green-100 border-green-200', icon: 'fa-check-circle text-green-500' };
+                case 'ON_PROGRESS': return { text: 'On Progress', color: 'text-blue-700 bg-blue-100 border-blue-200', icon: 'fa-spinner fa-spin text-blue-500' };
+                case 'CANCELLED': return { text: 'Dibatalkan', color: 'text-red-700 bg-red-100 border-red-200', icon: 'fa-ban text-red-500' };
+                default: return { text: 'Belum', color: 'text-slate-600 bg-slate-100 border-slate-200', icon: 'fa-circle text-slate-300' };
             }
-            return content;
-        };
+        }
+
+        function getEmployeeTemplates(emp) {
+            let reviews = [...baseReviewChecklistTemplate];
+            if (emp.role.toLowerCase() === 'staff' && emp.department.toLowerCase() === 'sales marketing') {
+                reviews.unshift({ 
+                    id: 'review_ojt', label: 'Review OJT', type: 'review', 
+                    instructions: ["Evaluasi pemahaman produk", "Simulasi sales call"], 
+                    policies: ["Wajib lulus sebelum bertemu klien langsung."] 
+                });
+            }
+            return { admin: adminChecklistTemplate, reviews: reviews };
+        }
+
+        function calculateProgress(emp) {
+            if (emp.isTerminated) return 100;
+
+            const templates = getEmployeeTemplates(emp);
+            const allItems = [...templates.admin, ...templates.reviews];
+            if(allItems.length === 0) return 0;
+            
+            let doneCount = 0;
+            allItems.forEach(item => {
+                if (emp.checklist[item.id] && emp.checklist[item.id].status === 'DONE') doneCount++;
+            });
+            return Math.round((doneCount / allItems.length) * 100);
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('employee-table-body');
+            tbody.innerHTML = '';
+            
+            const filterName = document.getElementById('filter-name')?.value.toLowerCase() || '';
+            const filterRole = document.getElementById('filter-role')?.value || '';
+            const filterDept = document.getElementById('filter-dept')?.value || '';
+            const filterEntity = document.getElementById('filter-entity')?.value || '';
+            const filterProgress = document.getElementById('filter-progress')?.value || '';
+
+            let totalProgress = 0;
+            let displayCount = 0;
+
+            employees.forEach(emp => {
+                const progress = calculateProgress(emp);
+                
+                let isMatch = true;
+                if (filterName && !emp.name.toLowerCase().includes(filterName)) isMatch = false;
+                if (filterRole && emp.role !== filterRole) isMatch = false;
+                if (filterDept && emp.department !== filterDept) isMatch = false;
+                if (filterEntity && emp.entity !== filterEntity) isMatch = false;
+                
+                if (filterProgress) {
+                    if (filterProgress === 'terminated' && !emp.isTerminated) isMatch = false;
+                    if (filterProgress !== 'terminated' && emp.isTerminated) isMatch = false;
+                    
+                    if (filterProgress === '0-25' && (progress < 0 || progress > 25)) isMatch = false;
+                    if (filterProgress === '26-50' && (progress < 26 || progress > 50)) isMatch = false;
+                    if (filterProgress === '51-75' && (progress < 51 || progress > 75)) isMatch = false;
+                    if (filterProgress === '76-100' && (progress < 76 || progress > 100)) isMatch = false;
+                }
+
+                if (!isMatch) return; 
+
+                displayCount++;
+                totalProgress += progress;
+                let progColor = progress === 100 ? 'bg-green-500' : (progress < 40 ? 'bg-orange-500' : 'bg-indigo-500');
+                
+                let badgeHtml = '';
+                if (emp.isTerminated) {
+                    progColor = 'bg-red-500';
+                    badgeHtml = `<span class="bg-red-50 text-red-700 text-[9px] px-2 py-0.5 rounded font-bold uppercase tracking-wider border border-red-200 ml-2" title="${emp.terminationNotes}">${emp.terminationReasonType}</span>`;
+                }
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition-colors group">
+                        <td class="p-4 border-b border-gray-100">
+                            <div class="flex items-center gap-3">
+                                <img src="${emp.avatar}" class="w-9 h-9 rounded-full object-cover">
+                                <div>
+                                    <p class="font-bold text-gray-900 text-sm group-hover:text-indigo-600 transition-colors">${emp.name}</p>
+                                    <p class="text-[11px] text-gray-500">${emp.email}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="p-4 border-b border-gray-100">
+                            <p class="text-sm font-medium text-gray-800">${emp.role}</p>
+                            <p class="text-[11px] text-gray-500">${emp.department}</p>
+                        </td>
+                        <td class="p-4 border-b border-gray-100 text-sm font-medium text-gray-700">${emp.entity}</td>
+                        <td class="p-4 border-b border-gray-100 text-sm text-gray-600">${formatDateUI(emp.startDate)}</td>
+                        <td class="p-4 border-b border-gray-100">
+                            <div class="flex items-center mb-1">
+                                <span class="text-xs font-bold text-gray-700">${progress}%</span>
+                                ${badgeHtml}
+                            </div>
+                            <div class="w-full bg-slate-200 rounded-full h-1.5"><div class="${progColor} h-1.5 rounded-full progress-bar-animated" style="width: ${progress}%"></div></div>
+                        </td>
+                        <td class="p-4 border-b border-gray-100 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <button onclick="openDetailModal('${emp.id}')" class="px-3 py-1.5 bg-white border border-indigo-200 text-indigo-700 rounded-lg text-xs font-bold hover:bg-indigo-50 transition-all shadow-sm">
+                                    Detail
+                                </button>
+                                <button onclick="openEditEmployeeModal('${emp.id}')" class="px-3 py-1.5 bg-white border border-slate-300 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-50 transition-all shadow-sm" title="Edit Data">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            if(displayCount === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-sm text-gray-500 font-medium">Tidak ada data karyawan yang sesuai.</td></tr>`;
+            }
+
+            document.getElementById('total-onboarding').innerText = displayCount;
+            const avg = displayCount > 0 ? Math.round(totalProgress / displayCount) : 0;
+            document.getElementById('avg-progress').innerText = `${avg}%`;
+            document.getElementById('avg-progress-bar').style.width = `${avg}%`;
+        }
+
+        function resetFilters() {
+            if(document.getElementById('filter-name')) document.getElementById('filter-name').value = '';
+            document.getElementById('filter-role').value = '';
+            document.getElementById('filter-dept').value = '';
+            document.getElementById('filter-entity').value = '';
+            document.getElementById('filter-progress').value = '';
+            renderTable();
+        }
+
+        function openAddModal() {
+            const m = document.getElementById('add-modal');
+            m.classList.remove('hidden');
+            setTimeout(() => { m.classList.remove('opacity-0'); m.children[0].classList.remove('scale-95'); }, 10);
+        }
+        function closeAddModal() {
+            const m = document.getElementById('add-modal');
+            m.classList.add('opacity-0'); m.children[0].classList.add('scale-95');
+            setTimeout(() => m.classList.add('hidden'), 300);
+        }
+        function openAddEmployeeModal() { document.getElementById('form-add-emp').reset(); openAddModal(); }
+
+        async function submitNewEmployee(e) {
+            e.preventDefault();
+            const name = document.getElementById('add-name').value;
+            const newEmp = {
+                name: name.toUpperCase(), email: document.getElementById('add-email').value,
+                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4F46E5&color=fff`,
+                role: document.getElementById('add-role').value, department: document.getElementById('add-dept').value,
+                entity: document.getElementById('add-entity').value, startDate: document.getElementById('add-start').value,
+                checklist: {},
+                isTerminated: false
+            };
+            
+            const tmpl = getEmployeeTemplates(newEmp);
+            [...tmpl.admin, ...tmpl.reviews].forEach(t => {
+                newEmp.checklist[t.id] = { status: 'NONE', date: '', scheduledDate: '', actualDate: '', notes: '' };
+            });
+            
+            try {
+                const docRef = await db.collection("employees").add(newEmp);
+                newEmp.id = docRef.id;
+                employees.push(newEmp);
+                closeAddModal();
+                renderTable();
+                showNotification(`${name} ditambahkan ke sistem!`);
+            } catch (error) {
+                console.error(error);
+                showNotification("Gagal menambah karyawan!");
+            }
+        }
+
+        function openEditEmployeeModal(empId) {
+            currentEditTableEmpId = empId;
+            const emp = employees.find(e => e.id === empId);
+            if(!emp) return;
+
+            document.getElementById('edit-name').value = emp.name;
+            document.getElementById('edit-email').value = emp.email;
+            document.getElementById('edit-start').value = emp.startDate;
+            document.getElementById('edit-role').value = emp.role;
+            document.getElementById('edit-dept').value = emp.department;
+            document.getElementById('edit-entity').value = emp.entity;
+
+            const m = document.getElementById('edit-emp-modal');
+            m.classList.remove('hidden');
+            setTimeout(() => { m.classList.remove('opacity-0'); m.children[0].classList.remove('scale-95'); }, 10);
+        }
+
+        function closeEditEmployeeModal() {
+            const m = document.getElementById('edit-emp-modal');
+            m.classList.add('opacity-0'); m.children[0].classList.add('scale-95');
+            setTimeout(() => { m.classList.add('hidden'); currentEditTableEmpId = null; }, 300);
+        }
+
+        async function submitEditEmployee(e) {
+            e.preventDefault();
+            if(!currentEditTableEmpId) return;
+
+            const emp = employees.find(e => e.id === currentEditTableEmpId);
+
+            emp.name = document.getElementById('edit-name').value.toUpperCase();
+            emp.email = document.getElementById('edit-email').value;
+            emp.startDate = document.getElementById('edit-start').value;
+            emp.role = document.getElementById('edit-role').value;
+            emp.department = document.getElementById('edit-dept').value;
+            emp.entity = document.getElementById('edit-entity').value;
+            emp.avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(emp.name)}&background=4F46E5&color=fff`;
+
+            try {
+                await db.collection("employees").doc(emp.id).update({
+                    name: emp.name, email: emp.email, startDate: emp.startDate,
+                    role: emp.role, department: emp.department, entity: emp.entity, avatar: emp.avatar
+                });
+                closeEditEmployeeModal();
+                renderTable();
+                showNotification(`Data ${emp.name} diperbarui!`);
+            } catch (error) {
+                console.error(error);
+                showNotification("Gagal memperbarui karyawan!");
+            }
+        }
+
+        function openTerminateModal() {
+            if(!currentEmployeeId) return;
+            document.getElementById('form-terminate').reset();
+            const m = document.getElementById('terminate-modal');
+            m.classList.remove('hidden');
+            setTimeout(() => { m.classList.remove('opacity-0'); m.children[0].classList.remove('scale-95'); }, 10);
+        }
+
+        function closeTerminateModal() {
+            const m = document.getElementById('terminate-modal');
+            m.classList.add('opacity-0'); m.children[0].classList.add('scale-95');
+            setTimeout(() => m.classList.add('hidden'), 300);
+        }
+
+        async function submitTerminate(e) {
+            e.preventDefault();
+            if(!currentEmployeeId) return;
+            
+            const emp = employees.find(e => e.id === currentEmployeeId);
+            const reason = document.getElementById('term-reason').value;
+            const notes = document.getElementById('term-notes').value;
+            
+            try {
+                await db.collection("employees").doc(emp.id).update({
+                    isTerminated: true,
+                    terminationReasonType: reason,
+                    terminationNotes: notes
+                });
+                
+                emp.isTerminated = true;
+                emp.terminationReasonType = reason;
+                emp.terminationNotes = notes;
+                
+                closeTerminateModal();
+                refreshModalLists(emp);
+                renderTable();
+                showNotification(`Onboarding ${emp.name} diselesaikan.`);
+            } catch (error) {
+                console.error(error);
+                showNotification("Gagal mengubah status!");
+            }
+        }
+        
+        async function cancelTermination() {
+            if(!currentEmployeeId) return;
+            const emp = employees.find(e => e.id === currentEmployeeId);
+            if(emp && emp.isTerminated) {
+                try {
+                    await db.collection("employees").doc(emp.id).update({
+                        isTerminated: false,
+                        terminationReasonType: '',
+                        terminationNotes: ''
+                    });
+                    
+                    emp.isTerminated = false;
+                    emp.terminationReasonType = '';
+                    emp.terminationNotes = '';
+                    
+                    refreshModalLists(emp);
+                    renderTable();
+                    showNotification(`Status penyelesaian dibatalkan.`);
+                } catch (error) {
+                    console.error(error);
+                    showNotification("Gagal membatalkan status!");
+                }
+            }
+        }
+
+        function openDetailModal(empId) {
+            currentEmployeeId = empId;
+            const emp = employees.find(e => e.id === empId);
+            document.getElementById('modal-name').innerText = emp.name;
+            document.getElementById('modal-role-entity').innerHTML = `${emp.role} | ${emp.department} &bull; ${emp.entity}`;
+            document.getElementById('modal-avatar').src = emp.avatar;
+
+            refreshModalLists(emp);
+
+            const m = document.getElementById('detail-modal');
+            m.classList.remove('hidden');
+            setTimeout(() => { m.classList.remove('opacity-0'); m.children[0].classList.remove('scale-95'); }, 10);
+        }
+
+        function closeDetailModal() {
+            closeItemCanvas(); 
+            const m = document.getElementById('detail-modal');
+            m.classList.add('opacity-0'); m.children[0].classList.add('scale-95');
+            setTimeout(() => { m.classList.add('hidden'); currentEmployeeId = null; }, 300);
+            renderTable(); 
+        }
+
+        function refreshModalLists(emp) {
+            const tmpl = getEmployeeTemplates(emp);
+            const btnTerminate = document.getElementById('btn-terminate');
+            let bannerEl = document.getElementById('terminate-alert-banner');
+            
+            if (!bannerEl) {
+                const gridDiv = document.querySelector('#detail-modal .grid');
+                gridDiv.insertAdjacentHTML('beforebegin', '<div id="terminate-alert-banner" class="hidden mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex flex-col gap-1 shadow-sm"></div>');
+                bannerEl = document.getElementById('terminate-alert-banner');
+            }
+
+            const progressText = document.getElementById('modal-progress-text');
+            progressText.className = 'text-2xl font-black leading-none text-indigo-600';
+
+            if (emp.isTerminated) {
+                btnTerminate.classList.add('hidden');
+                progressText.classList.replace('text-indigo-600', 'text-red-600');
+                bannerEl.innerHTML = `
+                    <div class="flex justify-between items-start w-full">
+                        <div>
+                            <strong class="text-sm text-red-700 flex items-center gap-2"><i class="fa-solid fa-circle-info"></i> Onboarding Diselesaikan: ${emp.terminationReasonType}</strong>
+                            <p class="text-xs text-red-600 ml-6 mt-1">${emp.terminationNotes}</p>
+                        </div>
+                        <button onclick="cancelTermination()" class="bg-white px-3 py-1.5 rounded-lg border border-red-200 text-red-600 text-xs font-bold hover:bg-red-50 hover:text-red-800 transition-colors shadow-sm whitespace-nowrap flex items-center gap-1.5">
+                            <i class="fa-solid fa-rotate-left"></i> Batalkan
+                        </button>
+                    </div>`;
+                bannerEl.classList.remove('hidden');
+            } else {
+                btnTerminate.classList.remove('hidden');
+                bannerEl.classList.add('hidden');
+            }
+
+            document.getElementById('admin-list').innerHTML = tmpl.admin.map(t => renderItemCard(emp, t)).join('');
+            document.getElementById('review-list').innerHTML = tmpl.reviews.map(t => renderItemCard(emp, t)).join('');
+            
+            const progress = calculateProgress(emp);
+            progressText.innerText = `${progress}%`;
+            
+            if (progress === 100 && !emp.isTerminated) {
+                 progressText.classList.replace('text-indigo-600', 'text-green-500');
+            }
+        }
+
+        function renderItemCard(emp, templateItem) {
+            if(!emp.checklist[templateItem.id]) {
+                emp.checklist[templateItem.id] = { status: 'NONE', date: '', scheduledDate: '', actualDate: '', notes: '' };
+            }
+            const data = emp.checklist[templateItem.id];
+            const stat = getStatusInfo(data.status);
+            
+            let dateText = '';
+            if (templateItem.type === 'admin' && data.date) {
+                dateText = `<span class="text-[10px] text-slate-500 flex items-center gap-1 mt-1"><i class="fa-regular fa-calendar"></i> Selesai: ${formatDateUI(data.date)}</span>`;
+            } else if (templateItem.type === 'review' && data.scheduledDate) {
+                dateText = `<span class="text-[10px] text-slate-500 flex items-center gap-1 mt-1"><i class="fa-regular fa-calendar"></i> Jadwal: ${formatDateUI(data.scheduledDate)}</span>`;
+            }
+
+            return `
+                <div onclick="openItemCanvas('${templateItem.id}', '${templateItem.type}')" class="bg-white border border-slate-200 rounded-xl p-3.5 hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer group relative overflow-hidden">
+                    <div class="absolute inset-y-0 left-0 w-1 bg-transparent group-hover:bg-indigo-500 transition-colors"></div>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm font-bold text-slate-800 group-hover:text-indigo-700 transition-colors">${templateItem.label}</p>
+                            ${dateText}
+                        </div>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold border flex items-center gap-1.5 ${stat.color} whitespace-nowrap">
+                            <i class="fa-solid ${stat.icon}"></i> ${stat.text}
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openItemCanvas(itemId, itemType) {
+            currentEditingItemId = itemId;
+            currentEditingItemType = itemType;
+            const emp = employees.find(e => e.id === currentEmployeeId);
+            const tmpl = getEmployeeTemplates(emp)[itemType === 'admin' ? 'admin' : 'reviews'].find(t => t.id === itemId);
+            const data = emp.checklist[itemId];
+
+            document.getElementById('canvas-type').innerText = itemType === 'admin' ? 'Administratif' : 'Review Kinerja';
+            document.getElementById('canvas-title').innerText = tmpl.label;
+            document.getElementById('canvas-instructions').innerHTML = tmpl.instructions.map(i => `<li>${i}</li>`).join('');
+            document.getElementById('canvas-policies').innerHTML = tmpl.policies.map(i => `<li>${i}</li>`).join('');
+
+            document.getElementById('input-status').value = data.status;
+            document.getElementById('input-notes').value = data.notes || '';
+
+            const adminGrp = document.getElementById('date-group-admin');
+            const reviewGrp = document.getElementById('date-group-review');
+            if (itemType === 'admin') {
+                adminGrp.classList.remove('hidden'); reviewGrp.classList.add('hidden');
+                document.getElementById('input-date-single').value = data.date || '';
+            } else {
+                adminGrp.classList.add('hidden'); reviewGrp.classList.remove('hidden');
+                document.getElementById('input-date-schedule').value = data.scheduledDate || '';
+                document.getElementById('input-date-actual').value = data.actualDate || '';
+            }
+
+            const canvas = document.getElementById('item-canvas');
+            canvas.classList.remove('hidden');
+            setTimeout(() => canvas.classList.remove('translate-x-full'), 10);
+        }
+
+        function closeItemCanvas() {
+            const canvas = document.getElementById('item-canvas');
+            canvas.classList.add('translate-x-full');
+            setTimeout(() => { canvas.classList.add('hidden'); currentEditingItemId = null; }, 300);
+        }
+
+        async function saveItemDetail() {
+            if(!currentEmployeeId || !currentEditingItemId) return;
+            const emp = employees.find(e => e.id === currentEmployeeId);
+            const data = emp.checklist[currentEditingItemId];
+
+            data.status = document.getElementById('input-status').value;
+            data.notes = document.getElementById('input-notes').value;
+
+            if (currentEditingItemType === 'admin') {
+                data.date = document.getElementById('input-date-single').value;
+            } else {
+                data.scheduledDate = document.getElementById('input-date-schedule').value;
+                data.actualDate = document.getElementById('input-date-actual').value;
+            }
+
+            try {
+                await db.collection("employees").doc(emp.id).update({
+                    checklist: emp.checklist
+                });
+                showNotification(`Data '${currentEditingItemId}' disimpan.`);
+                closeItemCanvas();
+                refreshModalLists(emp);
+                renderCalendar(); 
+            } catch(error) {
+                console.error(error);
+                showNotification("Gagal menyimpan progress!");
+            }
+        }
+
+        function changeCalMonth(offset) {
+            currentCalDate.setMonth(currentCalDate.getMonth() + offset);
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            const monthYearText = document.getElementById('calendar-month-year');
+            if (!grid || !monthYearText) return;
+
+            grid.innerHTML = '';
+            
+            const year = currentCalDate.getFullYear();
+            const month = currentCalDate.getMonth();
+            
+            const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            monthYearText.innerText = `${monthNames[month]} ${year}`;
+
+            let firstDay = new Date(year, month, 1).getDay();
+            firstDay = firstDay === 0 ? 6 : firstDay - 1; 
+            
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            let remindersMap = {};
+            employees.forEach(emp => {
+                const tmpl = getEmployeeTemplates(emp).reviews;
+                tmpl.forEach(t => {
+                    const data = emp.checklist[t.id];
+                    if (data && data.scheduledDate && data.status !== 'DONE' && data.status !== 'CANCELLED') {
+                        const dateStr = data.scheduledDate; 
+                        if(!remindersMap[dateStr]) remindersMap[dateStr] = [];
+                        remindersMap[dateStr].push({ empName: emp.name, task: t.label, status: data.status, role: emp.role });
+                    }
+                });
+            });
+
+            for (let i = 0; i < firstDay; i++) {
+                grid.innerHTML += `<div class="p-2 border-r border-b border-gray-100 bg-gray-50/50 min-h-[120px]"></div>`;
+            }
+
+            const today = new Date();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const currentDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+                
+                let eventsHtml = '';
+                if(remindersMap[currentDateStr]) {
+                    remindersMap[currentDateStr].forEach(rem => {
+                        const isPast = new Date(currentDateStr) < new Date(today.setHours(0,0,0,0));
+                        const bgClass = isPast ? 'bg-red-50 border-red-200 text-red-700' : 'bg-indigo-50 border-indigo-200 text-indigo-700';
+                        const dotClass = isPast ? 'bg-red-500' : 'bg-indigo-500';
+                        
+                        eventsHtml += `
+                            <div class="mt-1 p-1.5 border rounded-lg shadow-sm ${bgClass} text-[10px] leading-tight cursor-pointer hover:shadow transition-shadow" title="${rem.task} - ${rem.empName}" onclick="switchView('dashboard')">
+                                <div class="flex items-center gap-1.5 mb-0.5">
+                                    <span class="w-1.5 h-1.5 rounded-full ${dotClass}"></span>
+                                    <strong class="truncate uppercase">${rem.empName}</strong>
+                                </div>
+                                <div class="truncate opacity-80">${rem.task}</div>
+                            </div>
+                        `;
+                    });
+                }
+
+                grid.innerHTML += `
+                    <div class="p-2 border-r border-b border-gray-200 min-h-[120px] bg-white hover:bg-slate-50 transition-colors">
+                        <div class="flex justify-start mb-1">
+                            <span class="text-sm font-bold w-7 h-7 flex items-center justify-center rounded-full ${isToday ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-700'}">${day}</span>
+                        </div>
+                        <div class="flex flex-col gap-1 overflow-y-auto max-h-[90px] pr-1">
+                            ${eventsHtml}
+                        </div>
+                    </div>
+                `;
+            }
+
+            const totalCellsRendered = firstDay + daysInMonth;
+            const remainingCells = (Math.ceil(totalCellsRendered / 7) * 7) - totalCellsRendered;
+            for (let i = 0; i < remainingCells; i++) {
+                grid.innerHTML += `<div class="p-2 border-r border-b border-gray-100 bg-gray-50/50 min-h-[120px]"></div>`;
+            }
+        }
 
         function switchAdminTab(tab) {
             if(tab === 'template') {
                 document.getElementById('admin-tab-template').classList.remove('hidden');
                 document.getElementById('admin-tab-master').classList.add('hidden');
+                document.getElementById('tab-btn-template').className = "pb-3 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 transition-colors";
+                document.getElementById('tab-btn-master').className = "pb-3 text-sm font-bold text-gray-500 border-b-2 border-transparent hover:text-gray-700 transition-colors";
             } else {
                 document.getElementById('admin-tab-template').classList.add('hidden');
                 document.getElementById('admin-tab-master').classList.remove('hidden');
+                document.getElementById('tab-btn-template').className = "pb-3 text-sm font-bold text-gray-500 border-b-2 border-transparent hover:text-gray-700 transition-colors";
+                document.getElementById('tab-btn-master').className = "pb-3 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 transition-colors";
             }
         }
 
@@ -649,9 +1352,8 @@
             listDiv.innerHTML = '';
 
             adminChecklistTemplate.forEach((tmpl, index) => {
-                // Konversi baik array maupun string HTML ke format div container
-                const instHtml = `<div class="quill-content text-xs text-gray-700">${formatToHtml(tmpl.instructions)}</div>`;
-                const polHtml = `<div class="quill-content text-xs text-gray-700">${formatToHtml(tmpl.policies)}</div>`;
+                const instHtml = tmpl.instructions.map(i => `<li>${i}</li>`).join('');
+                const polHtml = tmpl.policies.map(p => `<li>${p}</li>`).join('');
                 
                 listDiv.innerHTML += `
                     <div class="border border-gray-200 rounded-xl p-4 bg-slate-50 relative group">
@@ -667,11 +1369,11 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <span class="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Instruksi Kerja</span>
-                                ${instHtml}
+                                <ul class="list-disc list-outside ml-4 text-xs text-gray-700 space-y-1">${instHtml}</ul>
                             </div>
                             <div>
                                 <span class="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Policy / Kebijakan</span>
-                                ${polHtml}
+                                <ul class="list-disc list-outside ml-4 text-xs text-gray-700 space-y-1">${polHtml}</ul>
                             </div>
                         </div>
                     </div>
@@ -679,21 +1381,103 @@
             });
         }
 
-        function renderMasterData() { /* FUNGSI SAMA PERSIS */ }
-        function addMasterRole(e) { /* FUNGSI SAMA PERSIS */ }
-        function deleteMasterRole(index) { /* FUNGSI SAMA PERSIS */ }
-        // ... dst (Fungsi master data tidak diubah)
+        function renderMasterData() {
+            const roleList = document.getElementById('list-master-role');
+            const deptList = document.getElementById('list-master-dept');
+            const entityList = document.getElementById('list-master-entity');
+            
+            if(roleList) {
+                roleList.innerHTML = masterRoles.map((role, i) => `
+                    <div class="flex justify-between items-center bg-slate-50 border border-gray-200 px-3 py-2 rounded-lg text-sm group transition-colors hover:bg-indigo-50">
+                        <span class="font-medium text-gray-700">${role}</span>
+                        <button type="button" onclick="deleteMasterRole(${i})" class="text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                `).join('');
+            }
 
-        // MENGEDIT TEMPLATE DENGAN WYSIWYG
+            if(deptList) {
+                deptList.innerHTML = masterDepartments.map((dept, i) => `
+                    <div class="flex justify-between items-center bg-slate-50 border border-gray-200 px-3 py-2 rounded-lg text-sm group transition-colors hover:bg-indigo-50">
+                        <span class="font-medium text-gray-700">${dept}</span>
+                        <button type="button" onclick="deleteMasterDept(${i})" class="text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                `).join('');
+            }
+
+            if(entityList) {
+                entityList.innerHTML = masterEntities.map((ent, i) => `
+                    <div class="flex justify-between items-center bg-slate-50 border border-gray-200 px-3 py-2 rounded-lg text-sm group transition-colors hover:bg-indigo-50">
+                        <span class="font-medium text-gray-700">${ent}</span>
+                        <button type="button" onclick="deleteMasterEntity(${i})" class="text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function addMasterRole(e) {
+            e.preventDefault();
+            const input = document.getElementById('input-master-role');
+            const val = input.value.trim();
+            if (val && !masterRoles.includes(val)) {
+                masterRoles.push(val);
+                input.value = '';
+                renderMasterData();
+                populateDropdowns();
+                showNotification("Posisi baru berhasil ditambahkan.");
+            }
+        }
+
+        function deleteMasterRole(index) {
+            masterRoles.splice(index, 1);
+            renderMasterData();
+            populateDropdowns();
+        }
+
+        function addMasterDept(e) {
+            e.preventDefault();
+            const input = document.getElementById('input-master-dept');
+            const val = input.value.trim();
+            if (val && !masterDepartments.includes(val)) {
+                masterDepartments.push(val);
+                input.value = '';
+                renderMasterData();
+                populateDropdowns();
+                showNotification("Departemen baru berhasil ditambahkan.");
+            }
+        }
+
+        function deleteMasterDept(index) {
+            masterDepartments.splice(index, 1);
+            renderMasterData();
+            populateDropdowns();
+        }
+
+        function addMasterEntity(e) {
+            e.preventDefault();
+            const input = document.getElementById('input-master-entity');
+            const val = input.value.trim();
+            if (val && !masterEntities.includes(val)) {
+                masterEntities.push(val);
+                input.value = '';
+                renderMasterData();
+                populateDropdowns();
+                showNotification("Entitas baru berhasil ditambahkan.");
+            }
+        }
+
+        function deleteMasterEntity(index) {
+            masterEntities.splice(index, 1);
+            renderMasterData();
+            populateDropdowns();
+        }
+
         function editAdminTemplate(index) {
             editingTemplateIndex = index;
             const tmpl = adminChecklistTemplate[index];
             
             document.getElementById('tmpl-label').value = tmpl.label;
-            
-            // Masukkan HTML ke dalam editor Quill
-            instQuill.root.innerHTML = formatToHtml(tmpl.instructions);
-            polQuill.root.innerHTML = formatToHtml(tmpl.policies);
+            document.getElementById('tmpl-inst').value = tmpl.instructions.join('\n');
+            document.getElementById('tmpl-pol').value = tmpl.policies.join('\n');
 
             document.getElementById('form-admin-title').innerText = "Edit Item Administratif";
             document.getElementById('text-submit-template').innerText = "Simpan Perubahan";
@@ -706,12 +1490,9 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // MEMBATALKAN EDIT DENGAN WYSIWYG
         function cancelEditTemplate() {
             editingTemplateIndex = null;
             document.getElementById('form-add-template').reset();
-            instQuill.setContents([]); // Kosongkan editor teks
-            polQuill.setContents([]);  // Kosongkan editor teks
             
             document.getElementById('form-admin-title').innerText = "Tambah Item Baru";
             document.getElementById('text-submit-template').innerText = "Tambah Item";
@@ -722,34 +1503,27 @@
             document.getElementById('btn-submit-template').classList.add('w-full');
         }
 
-        // MENYIMPAN CRUD TEMPLATE TERBARU
         function saveNewAdminTemplate(e) {
             e.preventDefault();
             const label = document.getElementById('tmpl-label').value;
-            
-            // Ambil konten HTML dari editor
-            const instHtml = instQuill.root.innerHTML === '<p><br></p>' ? '' : instQuill.root.innerHTML;
-            const polHtml = polQuill.root.innerHTML === '<p><br></p>' ? '' : polQuill.root.innerHTML;
+            const instRaw = document.getElementById('tmpl-inst').value;
+            const polRaw = document.getElementById('tmpl-pol').value;
 
-            if (!label || !instHtml || !polHtml) {
-                showNotification("Mohon lengkapi Form, Instruksi, dan Policy!");
-                return;
-            }
+            const instList = instRaw.split('\n').map(s => s.trim()).filter(s => s !== '');
+            const polList = polRaw.split('\n').map(s => s.trim()).filter(s => s !== '');
 
             if (editingTemplateIndex !== null) {
-                // Update
                 adminChecklistTemplate[editingTemplateIndex].label = label;
-                adminChecklistTemplate[editingTemplateIndex].instructions = instHtml; 
-                adminChecklistTemplate[editingTemplateIndex].policies = polHtml; 
+                adminChecklistTemplate[editingTemplateIndex].instructions = instList.length > 0 ? instList : ['-'];
+                adminChecklistTemplate[editingTemplateIndex].policies = polList.length > 0 ? polList : ['-'];
                 showNotification('Item berhasil diperbarui!');
             } else {
-                // Tambah baru
                 const newItem = {
                     id: 'admin_custom_' + Date.now(),
                     label: label,
                     type: 'admin',
-                    instructions: instHtml,
-                    policies: polHtml
+                    instructions: instList.length > 0 ? instList : ['-'],
+                    policies: polList.length > 0 ? polList : ['-']
                 };
                 adminChecklistTemplate.push(newItem);
                 showNotification('Item Administratif berhasil ditambahkan!');
@@ -765,21 +1539,10 @@
             showNotification('Item berhasil dihapus.');
         }
 
-        // Menampilkan Item Canvas saat Item di-klik di halaman Karyawan
-        function openItemCanvas(itemId, itemType) {
-            currentEditingItemId = itemId;
-            currentEditingItemType = itemType;
-            // ... (Pencarian data emp dan tmpl sama seperti aslinya)
-            
-            // Dummy bypass untuk render tampilan:
-            // render HTML kaya ke panel instruksi di dalam item-canvas
-            /*
-            Ganti logika pengisian list menjadi:
-            document.getElementById('canvas-instructions-container').innerHTML = formatToHtml(tmpl.instructions);
-            document.getElementById('canvas-policies-container').innerHTML = formatToHtml(tmpl.policies);
-            */
-        }
-        
+        document.addEventListener('DOMContentLoaded', () => {
+            populateDropdowns(); 
+            // Data akan diload saat berhasil login
+        });
     </script>
 </body>
 </html>
