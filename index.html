@@ -26,6 +26,12 @@
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         .sidebar-transition { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .canvas-transition { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        /* Style untuk menampilkan HTML dari editor (seperti di admin) */
+        .quill-content ul { list-style-type: disc !important; padding-left: 1.5rem !important; margin-top: 0.25rem; margin-bottom: 0.5rem; }
+        .quill-content ol { list-style-type: decimal !important; padding-left: 1.5rem !important; margin-top: 0.25rem; margin-bottom: 0.5rem; }
+        .quill-content p { margin-bottom: 0.25rem; }
+        .quill-content strong { font-weight: 700; }
+        .quill-content em { font-style: italic; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
@@ -286,12 +292,12 @@
                     <div class="bg-indigo-50/50 rounded-xl p-4 border border-indigo-100">
                         <div class="mb-4">
                             <h4 class="text-xs font-bold text-indigo-800 uppercase tracking-wider mb-2 flex items-center gap-1.5"><i class="fa-solid fa-list-check"></i> Instruksi Kerja</h4>
-                            <div id="canvas-instructions" class="text-sm text-slate-700 space-y-1"></div>
+                            <div id="canvas-instructions" class="quill-content text-sm text-slate-700 space-y-1"></div>
                         </div>
                         <div class="border-t border-indigo-200/60 my-3"></div>
                         <div>
                             <h4 class="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-2 flex items-center gap-1.5"><i class="fa-solid fa-shield-halved"></i> Policy</h4>
-                            <div id="canvas-policies" class="text-sm text-slate-700 space-y-1"></div>
+                            <div id="canvas-policies" class="quill-content text-sm text-slate-700 space-y-1"></div>
                         </div>
                     </div>
                     <div class="space-y-4">
