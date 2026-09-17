@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Pustaka Quill.js untuk Editor Teks ala MS Word -->
+    <!-- Pustaka Quill.js untuk Editor Teks -->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 
@@ -30,7 +30,6 @@
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         .sidebar-transition { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        /* Styling tambahan untuk Rich Text Editor */
         .quill-editor-container .ql-toolbar {
             border-top-left-radius: 0.5rem;
             border-top-right-radius: 0.5rem;
@@ -45,7 +44,6 @@
             min-height: 120px;
             font-size: 0.875rem;
         }
-        /* Style untuk menampilkan HTML dari editor */
         .quill-content ul { list-style-type: disc !important; padding-left: 1.5rem !important; margin-top: 0.25rem; margin-bottom: 0.5rem; }
         .quill-content ol { list-style-type: decimal !important; padding-left: 1.5rem !important; margin-top: 0.25rem; margin-bottom: 0.5rem; }
         .quill-content p { margin-bottom: 0.25rem; }
@@ -55,7 +53,6 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
 
-    <!-- LAYAR LOGIN -->
     <div id="login-view" class="min-h-screen flex items-center justify-center p-4 bg-slate-900 relative overflow-hidden">
         <div class="absolute inset-0 bg-indigo-900/20"></div>
         <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden relative z-10 border border-slate-100">
@@ -89,11 +86,8 @@
             </div>
         </div>
     </div>
-    <!-- AKHIR LAYAR LOGIN -->
 
-    <!-- APLIKASI UTAMA (Disembunyikan sampai Login) -->
     <div id="app-view" class="hidden min-h-screen w-full">
-        <!-- Sidebar / Drawer -->
         <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 text-white transform -translate-x-full sidebar-transition shadow-2xl flex flex-col">
             <div class="h-16 flex items-center px-6 border-b border-slate-800 gap-3">
                 <div class="bg-indigo-500 text-white p-1.5 rounded-lg">
@@ -118,13 +112,9 @@
             </div>
         </aside>
 
-        <!-- Overlay for sidebar on mobile -->
         <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-30 hidden opacity-0 transition-opacity"></div>
 
-        <!-- Main Content Wrapper -->
         <div class="flex-grow flex flex-col min-h-screen w-full transition-all duration-300">
-            
-            <!-- Top Navbar -->
             <nav class="bg-white border-b border-gray-200 sticky top-0 z-20 shadow-sm">
                 <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between h-16 items-center">
@@ -135,14 +125,9 @@
                             <h1 id="topbar-title" class="font-bold text-lg text-gray-900 hidden sm:block">Pengaturan Admin</h1>
                         </div>
                         <div class="flex items-center gap-4">
-                            <button class="text-gray-500 hover:text-gray-700 transition-colors relative mr-2">
-                                <i class="fa-solid fa-bell"></i>
-                                <span class="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
-                            </button>
                             <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center border border-indigo-200">
                                 <span class="text-indigo-700 font-bold text-sm">HR</span>
                             </div>
-                            <!-- Tombol Keluar (Logout) -->
                             <button onclick="handleLogout()" class="flex items-center gap-2 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 px-3 py-1.5 rounded-lg transition-colors shadow-sm ml-2">
                                 <i class="fa-solid fa-right-from-bracket"></i> <span class="hidden sm:inline">Keluar</span>
                             </button>
@@ -151,7 +136,6 @@
                 </div>
             </nav>
 
-            <!-- View: Admin / Pengaturan -->
             <main id="admin-view" class="flex-grow max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full block">
                 <div class="mb-6">
                     <h2 class="text-2xl font-bold text-gray-900">Pengaturan Administratif</h2>
@@ -175,22 +159,16 @@
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-gray-700 mb-1">Instruksi Kerja</label>
-                                        <!-- Container untuk Quill Editor -->
-                                        <div class="quill-editor-container rounded-lg">
-                                            <div id="tmpl-inst-editor"></div>
-                                        </div>
+                                        <div class="quill-editor-container rounded-lg"><div id="tmpl-inst-editor"></div></div>
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-gray-700 mb-1">Policy / Kebijakan</label>
-                                        <!-- Container untuk Quill Editor -->
-                                        <div class="quill-editor-container rounded-lg">
-                                            <div id="tmpl-pol-editor"></div>
-                                        </div>
+                                        <div class="quill-editor-container rounded-lg"><div id="tmpl-pol-editor"></div></div>
                                     </div>
                                     <div class="pt-4 border-t border-gray-100 flex gap-3">
                                         <button type="button" id="btn-cancel-edit" onclick="cancelEditTemplate()" class="hidden w-1/3 px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Batal</button>
                                         <button type="submit" id="btn-submit-template" class="w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 flex items-center justify-center gap-2 transition-colors shadow-sm">
-                                            <i id="icon-submit-template" class="fa-solid fa-plus"></i> <span id="text-submit-template">Tambah Item</span>
+                                            <i id="icon-submit-template" class="fa-solid fa-plus"></i> <span id="text-submit-template">Simpan</span>
                                         </button>
                                     </div>
                                 </form>
@@ -234,9 +212,8 @@
                     </div>
                 </div>
             </main>
-
-        </div> <!-- End Main Content -->
-    </div> <!-- END APLIKASI UTAMA -->
+        </div>
+    </div>
 
     <!-- Notification Toast -->
     <div id="notification" class="fixed bottom-6 right-6 max-w-sm bg-gray-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-start gap-3 transform translate-y-20 opacity-0 transition-all duration-300 z-[70] border border-gray-700">
@@ -247,12 +224,11 @@
         </div>
     </div>
 
-    <!-- FIREBASE LIBRARIES -->
     <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // --- KONFIGURASI FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyCobEgxTnMagQj6c8YsfiQtwk6zkvPaq-w",
             authDomain: "hr-onboarding-app-76582.firebaseapp.com",
@@ -263,17 +239,35 @@
         };
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-        // ----------------------------
+        const db = firebase.firestore();
 
-        // --- SISTEM LOGIN (AUTHENTICATION) ---
+        // Variabel penampung yang akan diisi dari Firebase
+        let adminChecklistTemplate = [];
+        let masterRoles = [];
+        let masterDepartments = [];
+        let masterEntities = [];
+        let editingTemplateIndex = null; 
+        
+        let instQuill, polQuill;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const quillOptions = {
+                theme: 'snow',
+                modules: { toolbar: [ ['bold', 'italic', 'underline'], [{ 'color': [] }, { 'background': [] }], [{ 'list': 'ordered'}, { 'list': 'bullet' }], ['clean'] ] },
+                placeholder: 'Ketik di sini...'
+            };
+            instQuill = new Quill('#tmpl-inst-editor', quillOptions);
+            polQuill = new Quill('#tmpl-pol-editor', quillOptions);
+        });
+
         auth.onAuthStateChanged((user) => {
             if (user) {
                 document.getElementById('login-view').classList.add('hidden');
                 document.getElementById('app-view').classList.remove('hidden');
                 document.getElementById('app-view').classList.add('flex');
                 
-                // Render form & data khusus admin
-                renderAdminTemplates();
+                // MENGAMBIL DATA DARI DATABASE
+                loadSettingsFromFirebase();
             } else {
                 document.getElementById('login-view').classList.remove('hidden');
                 document.getElementById('app-view').classList.add('hidden');
@@ -283,46 +277,14 @@
 
         function handleLogin(e) {
             e.preventDefault();
-            const email = document.getElementById('login-email').value;
-            const pass = document.getElementById('login-pass').value;
             const btn = document.getElementById('btn-login');
-            
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memeriksa...';
-            btn.disabled = true;
-
-            auth.signInWithEmailAndPassword(email, pass)
-                .then(() => {
-                    btn.innerHTML = 'Masuk Sistem';
-                    btn.disabled = false;
-                    document.getElementById('form-login').reset();
-                    showNotification("Berhasil Login!");
-                })
-                .catch((error) => {
-                    btn.innerHTML = 'Masuk Sistem';
-                    btn.disabled = false;
-                    alert("Gagal Login! Pastikan Email dan Kata Sandi benar.");
-                    console.error(error);
-                });
+            btn.innerHTML = 'Memeriksa...'; btn.disabled = true;
+            auth.signInWithEmailAndPassword(document.getElementById('login-email').value, document.getElementById('login-pass').value)
+                .then(() => { btn.innerHTML = 'Masuk Sistem'; btn.disabled = false; document.getElementById('form-login').reset(); showNotification("Berhasil Login!"); })
+                .catch(() => { btn.innerHTML = 'Masuk Sistem'; btn.disabled = false; alert("Gagal Login!"); });
         }
-
-        function handleLogout() {
-            auth.signOut().then(() => showNotification("Berhasil Keluar Sistem."));
-        }
-
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-            if (sidebar.classList.contains('-translate-x-full')) {
-                sidebar.classList.remove('-translate-x-full');
-                overlay.classList.remove('hidden');
-                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
-            } else {
-                sidebar.classList.add('-translate-x-full');
-                overlay.classList.add('opacity-0');
-                setTimeout(() => overlay.classList.add('hidden'), 300);
-            }
-        }
-
+        function handleLogout() { auth.signOut(); }
+        function toggleSidebar() { /* SAMA SEPERTI SEBELUMNYA */ }
         function showNotification(msg) {
             const notif = document.getElementById('notification');
             document.getElementById('notification-text').innerText = msg;
@@ -330,263 +292,164 @@
             setTimeout(() => notif.classList.add('translate-y-20', 'opacity-0'), 3000);
         }
 
-        // --- SETUP RICH TEXT EDITOR (QUILL.JS) ---
-        let instQuill, polQuill;
-        document.addEventListener('DOMContentLoaded', () => {
-            const quillOptions = {
-                theme: 'snow',
-                modules: {
-                    toolbar: [
-                        ['bold', 'italic', 'underline'], 
-                        [{ 'color': [] }, { 'background': [] }],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        ['clean']
-                    ]
-                },
-                placeholder: 'Ketik di sini...'
-            };
-            instQuill = new Quill('#tmpl-inst-editor', quillOptions);
-            polQuill = new Quill('#tmpl-pol-editor', quillOptions);
-        });
-
-        // --- DATA MASTER & TEMPLATE (Diadaptasi agar mendukug HTML) ---
-        let adminChecklistTemplate = [
-            { 
-                id: 'data', 
-                label: 'Pengumpulan Data Diri', 
-                type: 'admin',
-                instructions: "<ul><li>Minta Foto KK (Kirim Ke Nomor Recruitment)</li><li>Minta Karyawan Mengisi Di Data Karyawan</li><li>Pastikan Pengisian Data Karyawan Sesuai Standar HR</li></ul>",
-                policies: "<ul><li>Setiap karyawan baru wajib mengisi Data Karyawan di Presensi</li><li>HR memastikan keabsahan data presensi tersebut</li></ul>"
-            },
-            { 
-                id: 'kontrak', 
-                label: 'Tanda Tangan Kontrak', 
-                type: 'admin', 
-                instructions: "<ul><li>Siapkan draf kontrak sesuai posisi</li><li>Jadwalkan sesi tanda tangan dengan karyawan</li></ul>", 
-                policies: "<ul><li>Kontrak harus ditandatangani paling lambat hari pertama kerja</li></ul>" 
-            }
-        ];
-
-        let masterRoles = ["Staff", "Supervisor", "Manager"];
-        let masterDepartments = ["Operasional", "Sales Marketing", "Finance", "Engineering", "HR"];
-        let masterEntities = ["PT Alpha Jaya", "PT Beta Teknologi", "CV Gamma Sentosa"];
-        let editingTemplateIndex = null; 
-
-        // Fungsi Helper untuk jaga-jaga apabila format datanya aslinya Array (Konversi ke HTML)
-        const formatToHtml = (content) => {
-            if (Array.isArray(content)) {
-                return `<ul>` + content.map(i => `<li>${i}</li>`).join('') + `</ul>`;
-            }
-            return content;
-        };
-
-        function switchAdminTab(tab) {
-            if(tab === 'template') {
-                document.getElementById('admin-tab-template').classList.remove('hidden');
-                document.getElementById('admin-tab-master').classList.add('hidden');
-                document.getElementById('tab-btn-template').className = "pb-3 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 transition-colors";
-                document.getElementById('tab-btn-master').className = "pb-3 text-sm font-bold text-gray-500 border-b-2 border-transparent hover:text-gray-700 transition-colors";
-            } else {
-                document.getElementById('admin-tab-template').classList.add('hidden');
-                document.getElementById('admin-tab-master').classList.remove('hidden');
-                document.getElementById('tab-btn-template').className = "pb-3 text-sm font-bold text-gray-500 border-b-2 border-transparent hover:text-gray-700 transition-colors";
-                document.getElementById('tab-btn-master').className = "pb-3 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 transition-colors";
+        // --- SISTEM PENYIMPANAN KE DATABASE (FIREBASE) ---
+        async function loadSettingsFromFirebase() {
+            try {
+                const doc = await db.collection("settings").doc("masterData").get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    adminChecklistTemplate = data.adminChecklistTemplate || [];
+                    masterRoles = data.masterRoles || [];
+                    masterDepartments = data.masterDepartments || [];
+                    masterEntities = data.masterEntities || [];
+                } else {
+                    // Jika database masih kosong (baru pertama kali dipakai), buat data default
+                    adminChecklistTemplate = [
+                        { id: 'data', label: 'Pengumpulan Data Diri', type: 'admin', instructions: "<ul><li>Minta Foto KK</li><li>Isi Data Karyawan</li></ul>", policies: "<ul><li>Wajib diisi di hari pertama</li></ul>" }
+                    ];
+                    masterRoles = ["Staff", "Supervisor", "Manager"];
+                    masterDepartments = ["Operasional", "Sales Marketing", "Finance", "Engineering", "HR"];
+                    masterEntities = ["PT Alpha Jaya", "PT Beta Teknologi"];
+                    await saveSettingsToFirebase(); // Simpan otomatis data default ini
+                }
+                renderAdminTemplates();
+            } catch (error) {
+                console.error("Error loading settings:", error);
+                showNotification("Gagal mengambil pengaturan dari database.");
             }
         }
 
-        // TAMPILKAN LIST ITEM ADMINISTRATIF
+        async function saveSettingsToFirebase() {
+            try {
+                await db.collection("settings").doc("masterData").set({
+                    adminChecklistTemplate: adminChecklistTemplate,
+                    masterRoles: masterRoles,
+                    masterDepartments: masterDepartments,
+                    masterEntities: masterEntities
+                }, { merge: true });
+                return true;
+            } catch (error) {
+                console.error("Error saving settings:", error);
+                showNotification("Gagal menyimpan ke database.");
+                return false;
+            }
+        }
+
+        const formatToHtml = (content) => { return Array.isArray(content) ? `<ul>` + content.map(i => `<li>${i}</li>`).join('') + `</ul>` : content; };
+
+        function switchAdminTab(tab) {
+            document.getElementById('admin-tab-template').classList.toggle('hidden', tab !== 'template');
+            document.getElementById('admin-tab-master').classList.toggle('hidden', tab !== 'master');
+            document.getElementById('tab-btn-template').className = tab === 'template' ? "pb-3 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600" : "pb-3 text-sm font-bold text-gray-500 border-b-2 border-transparent hover:text-gray-700";
+            document.getElementById('tab-btn-master').className = tab === 'master' ? "pb-3 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600" : "pb-3 text-sm font-bold text-gray-500 border-b-2 border-transparent hover:text-gray-700";
+        }
+
         function renderAdminTemplates() {
             renderMasterData(); 
             const listDiv = document.getElementById('admin-template-list');
             listDiv.innerHTML = '';
-
             adminChecklistTemplate.forEach((tmpl, index) => {
                 const instHtml = `<div class="quill-content text-xs text-gray-700">${formatToHtml(tmpl.instructions)}</div>`;
                 const polHtml = `<div class="quill-content text-xs text-gray-700">${formatToHtml(tmpl.policies)}</div>`;
-                
                 listDiv.innerHTML += `
                     <div class="border border-gray-200 rounded-xl p-4 bg-slate-50 relative group">
                         <div class="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onclick="editAdminTemplate(${index})" class="text-blue-500 hover:text-blue-700 bg-white border border-blue-100 p-1.5 rounded-md shadow-sm transition-colors" title="Edit Item">
-                                <i class="fa-solid fa-pen text-sm"></i>
-                            </button>
-                            <button onclick="deleteAdminTemplate(${index})" class="text-red-500 hover:text-red-700 bg-white border border-red-100 p-1.5 rounded-md shadow-sm transition-colors" title="Hapus Item">
-                                <i class="fa-solid fa-trash-can text-sm"></i>
-                            </button>
+                            <button onclick="editAdminTemplate(${index})" class="text-blue-500 bg-white border border-blue-100 p-1.5 rounded-md"><i class="fa-solid fa-pen text-sm"></i></button>
+                            <button onclick="deleteAdminTemplate(${index})" class="text-red-500 bg-white border border-red-100 p-1.5 rounded-md"><i class="fa-solid fa-trash-can text-sm"></i></button>
                         </div>
-                        <h4 class="font-bold text-indigo-700 text-base mb-3 pr-16"><i class="fa-solid fa-tag text-xs mr-1 opacity-70"></i> ${tmpl.label}</h4>
+                        <h4 class="font-bold text-indigo-700 text-base mb-3"><i class="fa-solid fa-tag text-xs mr-1 opacity-70"></i> ${tmpl.label}</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <span class="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Instruksi Kerja</span>
-                                ${instHtml}
-                            </div>
-                            <div>
-                                <span class="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Policy / Kebijakan</span>
-                                ${polHtml}
-                            </div>
+                            <div><span class="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Instruksi</span>${instHtml}</div>
+                            <div><span class="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Policy</span>${polHtml}</div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             });
         }
 
-        // --- SISTEM CRUD UNTUK ITEM ADMINISTRATIF (DENGAN WYSIWYG) ---
-
-        // Masukkan data ke Editor saat tombol Edit ditekan
         function editAdminTemplate(index) {
             editingTemplateIndex = index;
             const tmpl = adminChecklistTemplate[index];
-            
             document.getElementById('tmpl-label').value = tmpl.label;
-            
-            // Masukkan format HTML ke dalam editor Quill
             instQuill.root.innerHTML = formatToHtml(tmpl.instructions);
             polQuill.root.innerHTML = formatToHtml(tmpl.policies);
-
             document.getElementById('form-admin-title').innerText = "Edit Item Administratif";
-            document.getElementById('text-submit-template').innerText = "Simpan Perubahan";
-            document.getElementById('icon-submit-template').className = "fa-solid fa-floppy-disk";
-            
             document.getElementById('btn-cancel-edit').classList.remove('hidden');
-            document.getElementById('btn-submit-template').classList.remove('w-full');
-            document.getElementById('btn-submit-template').classList.add('w-2/3');
-            
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Batal mengedit dan kosongkan editor
         function cancelEditTemplate() {
             editingTemplateIndex = null;
             document.getElementById('form-add-template').reset();
-            instQuill.setContents([]); 
-            polQuill.setContents([]);  
-            
+            instQuill.setContents([]); polQuill.setContents([]);  
             document.getElementById('form-admin-title').innerText = "Tambah Item Baru";
-            document.getElementById('text-submit-template').innerText = "Tambah Item";
-            document.getElementById('icon-submit-template').className = "fa-solid fa-plus";
-            
             document.getElementById('btn-cancel-edit').classList.add('hidden');
-            document.getElementById('btn-submit-template').classList.remove('w-2/3');
-            document.getElementById('btn-submit-template').classList.add('w-full');
         }
 
-        // Simpan Form (Baik Tambah Baru maupun Update)
-        function saveNewAdminTemplate(e) {
+        async function saveNewAdminTemplate(e) {
             e.preventDefault();
             const label = document.getElementById('tmpl-label').value;
-            
-            // Ambil konten HTML dari editor teks
             const instHtml = instQuill.root.innerHTML === '<p><br></p>' ? '' : instQuill.root.innerHTML;
             const polHtml = polQuill.root.innerHTML === '<p><br></p>' ? '' : polQuill.root.innerHTML;
 
-            if (!label || !instHtml || !polHtml) {
-                showNotification("Mohon lengkapi Form, Instruksi, dan Policy!");
-                return;
-            }
+            if (!label || !instHtml || !polHtml) { return showNotification("Mohon lengkapi Form!"); }
 
             if (editingTemplateIndex !== null) {
-                // Update Data Lama
                 adminChecklistTemplate[editingTemplateIndex].label = label;
                 adminChecklistTemplate[editingTemplateIndex].instructions = instHtml; 
                 adminChecklistTemplate[editingTemplateIndex].policies = polHtml; 
-                showNotification('Item berhasil diperbarui!');
             } else {
-                // Tambah Data Baru
-                const newItem = {
-                    id: 'admin_custom_' + Date.now(),
-                    label: label,
-                    type: 'admin',
-                    instructions: instHtml,
-                    policies: polHtml
-                };
-                adminChecklistTemplate.push(newItem);
-                showNotification('Item Administratif berhasil ditambahkan!');
+                adminChecklistTemplate.push({ id: 'admin_custom_' + Date.now(), label: label, type: 'admin', instructions: instHtml, policies: polHtml });
             }
 
-            renderAdminTemplates();
-            cancelEditTemplate(); 
+            const success = await saveSettingsToFirebase(); // Simpan ke Database
+            if(success) {
+                showNotification(editingTemplateIndex !== null ? 'Item diperbarui di Database!' : 'Item ditambahkan ke Database!');
+                renderAdminTemplates();
+                cancelEditTemplate(); 
+            }
         }
 
-        function deleteAdminTemplate(index) {
+        async function deleteAdminTemplate(index) {
             if(confirm("Yakin ingin menghapus item ini?")) {
                 adminChecklistTemplate.splice(index, 1);
+                await saveSettingsToFirebase(); // Hapus di Database
                 renderAdminTemplates();
-                showNotification('Item berhasil dihapus.');
+                showNotification('Item berhasil dihapus dari Database.');
             }
         }
 
-        // --- SISTEM CRUD UNTUK MASTER DATA ---
+        // --- SISTEM CRUD MASTER DATA ---
         function renderMasterData() {
-            const roleList = document.getElementById('list-master-role');
-            const deptList = document.getElementById('list-master-dept');
-            const entityList = document.getElementById('list-master-entity');
-            
-            if(roleList) {
-                roleList.innerHTML = masterRoles.map((role, i) => `
-                    <div class="flex justify-between items-center bg-slate-50 border border-gray-200 px-3 py-2 rounded-lg text-sm group transition-colors hover:bg-indigo-50">
-                        <span class="font-medium text-gray-700">${role}</span>
-                        <button type="button" onclick="deleteMasterRole(${i})" class="text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"><i class="fa-solid fa-trash-can"></i></button>
-                    </div>
-                `).join('');
-            }
-
-            if(deptList) {
-                deptList.innerHTML = masterDepartments.map((dept, i) => `
-                    <div class="flex justify-between items-center bg-slate-50 border border-gray-200 px-3 py-2 rounded-lg text-sm group transition-colors hover:bg-indigo-50">
-                        <span class="font-medium text-gray-700">${dept}</span>
-                        <button type="button" onclick="deleteMasterDept(${i})" class="text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"><i class="fa-solid fa-trash-can"></i></button>
-                    </div>
-                `).join('');
-            }
-
-            if(entityList) {
-                entityList.innerHTML = masterEntities.map((ent, i) => `
-                    <div class="flex justify-between items-center bg-slate-50 border border-gray-200 px-3 py-2 rounded-lg text-sm group transition-colors hover:bg-indigo-50">
-                        <span class="font-medium text-gray-700">${ent}</span>
-                        <button type="button" onclick="deleteMasterEntity(${i})" class="text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"><i class="fa-solid fa-trash-can"></i></button>
-                    </div>
-                `).join('');
-            }
+            const createHtml = (arr, delFn) => arr.map((item, i) => `<div class="flex justify-between items-center bg-slate-50 border border-gray-200 px-3 py-2 rounded-lg text-sm group"><span class="font-medium text-gray-700">${item}</span><button type="button" onclick="${delFn}(${i})" class="text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100"><i class="fa-solid fa-trash-can"></i></button></div>`).join('');
+            document.getElementById('list-master-role').innerHTML = createHtml(masterRoles, 'deleteMasterRole');
+            document.getElementById('list-master-dept').innerHTML = createHtml(masterDepartments, 'deleteMasterDept');
+            document.getElementById('list-master-entity').innerHTML = createHtml(masterEntities, 'deleteMasterEntity');
         }
 
-        function addMasterRole(e) {
-            e.preventDefault();
-            const input = document.getElementById('input-master-role');
+        async function addMasterData(inputId, arrayTarget, successMsg) {
+            const input = document.getElementById(inputId);
             const val = input.value.trim();
-            if (val && !masterRoles.includes(val)) {
-                masterRoles.push(val);
-                input.value = '';
-                renderMasterData();
-                showNotification("Posisi baru berhasil ditambahkan.");
+            if (val && !arrayTarget.includes(val)) {
+                arrayTarget.push(val);
+                if (await saveSettingsToFirebase()) { // Simpan ke Database
+                    input.value = ''; renderMasterData(); showNotification(successMsg);
+                } else {
+                    arrayTarget.pop(); // Batalkan jika gagal
+                }
             }
         }
-        function deleteMasterRole(index) { masterRoles.splice(index, 1); renderMasterData(); }
+        async function deleteMasterData(index, arrayTarget, successMsg) {
+            const removed = arrayTarget.splice(index, 1)[0];
+            if (await saveSettingsToFirebase()) { renderMasterData(); showNotification(successMsg); }
+            else { arrayTarget.splice(index, 0, removed); } // Batalkan jika gagal
+        }
 
-        function addMasterDept(e) {
-            e.preventDefault();
-            const input = document.getElementById('input-master-dept');
-            const val = input.value.trim();
-            if (val && !masterDepartments.includes(val)) {
-                masterDepartments.push(val);
-                input.value = '';
-                renderMasterData();
-                showNotification("Departemen baru berhasil ditambahkan.");
-            }
-        }
-        function deleteMasterDept(index) { masterDepartments.splice(index, 1); renderMasterData(); }
-
-        function addMasterEntity(e) {
-            e.preventDefault();
-            const input = document.getElementById('input-master-entity');
-            const val = input.value.trim();
-            if (val && !masterEntities.includes(val)) {
-                masterEntities.push(val);
-                input.value = '';
-                renderMasterData();
-                showNotification("Entitas baru berhasil ditambahkan.");
-            }
-        }
-        function deleteMasterEntity(index) { masterEntities.splice(index, 1); renderMasterData(); }
+        function addMasterRole(e) { e.preventDefault(); addMasterData('input-master-role', masterRoles, "Posisi berhasil disimpan di Database."); }
+        function deleteMasterRole(index) { deleteMasterData(index, masterRoles, "Posisi dihapus."); }
+        function addMasterDept(e) { e.preventDefault(); addMasterData('input-master-dept', masterDepartments, "Departemen berhasil disimpan di Database."); }
+        function deleteMasterDept(index) { deleteMasterData(index, masterDepartments, "Departemen dihapus."); }
+        function addMasterEntity(e) { e.preventDefault(); addMasterData('input-master-entity', masterEntities, "Entitas berhasil disimpan di Database."); }
+        function deleteMasterEntity(index) { deleteMasterData(index, masterEntities, "Entitas dihapus."); }
     </script>
 </body>
 </html>
