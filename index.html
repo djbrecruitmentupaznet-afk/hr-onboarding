@@ -26,6 +26,13 @@
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         .sidebar-transition { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .canvas-transition { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        /* Style untuk menampilkan list HTML (dari Quill Editor) di Canvas Instruksi */
+        .quill-content ul { list-style-type: disc !important; padding-left: 1.5rem !important; margin-top: 0.25rem; margin-bottom: 0.5rem; }
+        .quill-content ol { list-style-type: decimal !important; padding-left: 1.5rem !important; margin-top: 0.25rem; margin-bottom: 0.5rem; }
+        .quill-content p { margin-bottom: 0.25rem; }
+        .quill-content strong { font-weight: 700; }
+        .quill-content em { font-style: italic; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
@@ -78,7 +85,6 @@
             </div>
             <div class="py-6 px-4 flex-grow flex flex-col gap-2">
                 <p class="px-2 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Menu Utama</p>
-                <!-- Navigasi diubah menggunakan window.location.href -->
                 <button onclick="window.location.href='index.html'" id="menu-btn-dashboard" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors bg-indigo-600 text-white">
                     <i class="fa-solid fa-gauge-high w-5 text-center"></i> Monitoring Onboarding
                 </button>
@@ -287,12 +293,13 @@
                     <div class="bg-indigo-50/50 rounded-xl p-4 border border-indigo-100">
                         <div class="mb-4">
                             <h4 class="text-xs font-bold text-indigo-800 uppercase tracking-wider mb-2 flex items-center gap-1.5"><i class="fa-solid fa-list-check"></i> Instruksi Kerja</h4>
-                            <ul id="canvas-instructions" class="list-decimal list-outside text-sm text-slate-700 ml-4 marker:text-indigo-400 marker:font-semibold space-y-1"></ul>
+                            <!-- Diubah menjadi div untuk menampung format HTML Editor Teks -->
+                            <div id="canvas-instructions" class="quill-content text-sm text-slate-700 ml-4"></div>
                         </div>
                         <div class="border-t border-indigo-200/60 my-3"></div>
                         <div>
                             <h4 class="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-2 flex items-center gap-1.5"><i class="fa-solid fa-shield-halved"></i> Policy</h4>
-                            <ul id="canvas-policies" class="list-disc list-outside text-sm text-slate-700 ml-4 marker:text-emerald-500 space-y-1"></ul>
+                            <div id="canvas-policies" class="quill-content text-sm text-slate-700 ml-4"></div>
                         </div>
                     </div>
                     <div class="space-y-4">
@@ -485,12 +492,35 @@
         const db = firebase.firestore();
         const auth = firebase.auth(); 
 
-        // --- SISTEM LOGIN (AUTHENTICATION) ---
-        auth.onAuthStateChanged((user) => {
+        // Variabel Data dan Template
+        let adminChecklistTemplate = [];
+        let masterRoles = [];
+        let masterDepartments = [];
+        let masterEntities = [];
+
+        let baseReviewChecklistTemplate = [
+            { id: 'review1', label: 'Review Bulan 1', type: 'review', instructions: "<ul><li>Jadwalkan meeting</li><li>Siapkan form</li></ul>", policies: "<ul><li>Fokus adaptasi</li></ul>" },
+            { id: 'review2', label: 'Review Bulan 2', type: 'review', instructions: "<ul><li>Jadwalkan meeting</li></ul>", policies: "<ul><li>Fokus pencapaian target</li></ul>" },
+            { id: 'review3', label: 'Review Bulan 3 (Final)', type: 'review', instructions: "<ul><li>Siapkan form final probation</li></ul>", policies: "<ul><li>Menentukan kelanjutan kontrak</li></ul>" }
+        ];
+
+        let employees = [];
+        let currentEmployeeId = null;
+        let currentEditingItemId = null;
+        let currentEditingItemType = null; 
+        let currentEditTableEmpId = null; 
+
+        // --- SISTEM LOGIN (AUTHENTICATION) & FETCH SETTINGS DARI ADMIN ---
+        auth.onAuthStateChanged(async (user) => {
             if (user) {
                 document.getElementById('login-view').classList.add('hidden');
                 document.getElementById('app-view').classList.remove('hidden');
                 document.getElementById('app-view').classList.add('flex');
+                
+                // 1. Mengambil Pengaturan Master Data Dulu (Dari halaman admin.html)
+                await loadSettingsFromFirebase();
+                
+                // 2. Mengambil Data Karyawan
                 loadDataFromFirebase();
             } else {
                 document.getElementById('login-view').classList.remove('hidden');
@@ -499,6 +529,23 @@
                 document.getElementById('employee-table-body').innerHTML = '';
             }
         });
+
+        async function loadSettingsFromFirebase() {
+            try {
+                const doc = await db.collection("settings").doc("masterData").get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    adminChecklistTemplate = data.adminChecklistTemplate || [];
+                    masterRoles = data.masterRoles || [];
+                    masterDepartments = data.masterDepartments || [];
+                    masterEntities = data.masterEntities || [];
+                }
+                populateDropdowns(); // Update UI Dropdown dengan data terbaru
+            } catch (error) {
+                console.error("Error loading settings:", error);
+                showNotification("Gagal mengambil pengaturan master data.");
+            }
+        }
 
         function handleLogin(e) {
             e.preventDefault();
@@ -527,33 +574,6 @@
         function handleLogout() {
             auth.signOut().then(() => showNotification("Berhasil Keluar Sistem."));
         }
-
-        // Variabel Data dan Template
-        // (Di skenario nyata, master data dan checklist di bawah ini idealnya juga diambil dari Firestore, 
-        // tapi kita biarkan hardcode di sini agar fungsi Detail Karyawan tidak rusak)
-        let adminChecklistTemplate = [
-            { id: 'data', label: 'Pengumpulan Data Diri', type: 'admin', instructions: ["Minta Foto KK", "Minta Karyawan Mengisi Di Data Karyawan", "Pastikan Pengisian Sesuai Standar HR"], policies: ["Wajib diisi ketika karyawan pertama kali masuk"] },
-            { id: 'kontrak', label: 'Tanda Tangan Kontrak', type: 'admin', instructions: ["Siapkan draf kontrak sesuai posisi", "Jadwalkan sesi tanda tangan"], policies: ["Kontrak harus ditandatangani paling lambat hari pertama kerja"] },
-            { id: 'bast', label: 'BAST Fasilitas Kerja', type: 'admin', instructions: ["Siapkan form BAST", "Serahkan fasilitas"], policies: ["Wajib ditandatangani kedua belah pihak"] },
-            { id: 'email', label: 'Pembuatan Akun Email', type: 'admin', instructions: ["Request ke IT"], policies: ["Format: nama.depan@perusahaan.com"] },
-            { id: 'presensi', label: 'Akses Sistem Presensi', type: 'admin', instructions: ["Daftarkan sidik jari/wajah"], policies: ["Wajib aktif hari pertama"] }
-        ];
-
-        let baseReviewChecklistTemplate = [
-            { id: 'review1', label: 'Review Bulan 1', type: 'review', instructions: ["Jadwalkan meeting", "Siapkan form"], policies: ["Fokus adaptasi"] },
-            { id: 'review2', label: 'Review Bulan 2', type: 'review', instructions: ["Jadwalkan meeting"], policies: ["Fokus pencapaian target"] },
-            { id: 'review3', label: 'Review Bulan 3 (Final)', type: 'review', instructions: ["Siapkan form final probation"], policies: ["Menentukan kelanjutan kontrak"] }
-        ];
-
-        let employees = [];
-        let currentEmployeeId = null;
-        let currentEditingItemId = null;
-        let currentEditingItemType = null; 
-        
-        let masterRoles = ["Staff", "Supervisor", "Manager"];
-        let masterDepartments = ["Operasional", "Sales Marketing", "Finance", "Engineering", "HR"];
-        let masterEntities = ["PT Alpha Jaya", "PT Beta Teknologi", "CV Gamma Sentosa"];
-        let currentEditTableEmpId = null; 
 
         async function loadDataFromFirebase() {
             try {
@@ -628,8 +648,8 @@
 
         function getEmployeeTemplates(emp) {
             let reviews = [...baseReviewChecklistTemplate];
-            if (emp.role.toLowerCase() === 'staff' && emp.department.toLowerCase() === 'sales marketing') {
-                reviews.unshift({ id: 'review_ojt', label: 'Review OJT', type: 'review', instructions: ["Evaluasi produk"], policies: ["Wajib lulus"] });
+            if (emp.role && emp.department && emp.role.toLowerCase() === 'staff' && emp.department.toLowerCase() === 'sales marketing') {
+                reviews.unshift({ id: 'review_ojt', label: 'Review OJT', type: 'review', instructions: "<ul><li>Evaluasi produk</li></ul>", policies: "<ul><li>Wajib lulus</li></ul>" });
             }
             return { admin: adminChecklistTemplate, reviews: reviews };
         }
@@ -1008,6 +1028,14 @@
             `;
         }
 
+        // Helper function for converting array formats (from previous versions) to HTML string for Quill UI
+        const formatToHtml = (content) => {
+            if (Array.isArray(content)) {
+                return `<ul>` + content.map(i => `<li>${i}</li>`).join('') + `</ul>`;
+            }
+            return content;
+        };
+
         // Functions untuk Edit Progress Item
         function openItemCanvas(itemId, itemType) {
             currentEditingItemId = itemId;
@@ -1018,8 +1046,10 @@
 
             document.getElementById('canvas-type').innerText = itemType === 'admin' ? 'Administratif' : 'Review Kinerja';
             document.getElementById('canvas-title').innerText = tmpl.label;
-            document.getElementById('canvas-instructions').innerHTML = tmpl.instructions.map(i => `<li>${i}</li>`).join('');
-            document.getElementById('canvas-policies').innerHTML = tmpl.policies.map(i => `<li>${i}</li>`).join('');
+            
+            // Render string HTML langsung menggunakan innerHTML
+            document.getElementById('canvas-instructions').innerHTML = formatToHtml(tmpl.instructions);
+            document.getElementById('canvas-policies').innerHTML = formatToHtml(tmpl.policies);
 
             document.getElementById('input-status').value = data.status;
             document.getElementById('input-notes').value = data.notes || '';
@@ -1073,10 +1103,6 @@
                 showNotification("Gagal menyimpan progress!");
             }
         }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            populateDropdowns(); 
-        });
     </script>
 </body>
 </html>
