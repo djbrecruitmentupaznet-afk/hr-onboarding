@@ -78,7 +78,6 @@
             </div>
             <div class="py-6 px-4 flex-grow flex flex-col gap-2">
                 <p class="px-2 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Menu Utama</p>
-                <!-- Navigasi diubah menggunakan window.location.href -->
                 <button onclick="window.location.href='index.html'" id="menu-btn-dashboard" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors bg-indigo-600 text-white">
                     <i class="fa-solid fa-gauge-high w-5 text-center"></i> Monitoring Onboarding
                 </button>
@@ -287,12 +286,12 @@
                     <div class="bg-indigo-50/50 rounded-xl p-4 border border-indigo-100">
                         <div class="mb-4">
                             <h4 class="text-xs font-bold text-indigo-800 uppercase tracking-wider mb-2 flex items-center gap-1.5"><i class="fa-solid fa-list-check"></i> Instruksi Kerja</h4>
-                            <ul id="canvas-instructions" class="list-decimal list-outside text-sm text-slate-700 ml-4 marker:text-indigo-400 marker:font-semibold space-y-1"></ul>
+                            <div id="canvas-instructions" class="text-sm text-slate-700 space-y-1"></div>
                         </div>
                         <div class="border-t border-indigo-200/60 my-3"></div>
                         <div>
                             <h4 class="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-2 flex items-center gap-1.5"><i class="fa-solid fa-shield-halved"></i> Policy</h4>
-                            <ul id="canvas-policies" class="list-disc list-outside text-sm text-slate-700 ml-4 marker:text-emerald-500 space-y-1"></ul>
+                            <div id="canvas-policies" class="text-sm text-slate-700 space-y-1"></div>
                         </div>
                     </div>
                     <div class="space-y-4">
@@ -485,6 +484,28 @@
         const db = firebase.firestore();
         const auth = firebase.auth(); 
 
+        // Referensi Dokumen Master Data dari Firestore
+        const masterDataRef = db.collection('settings').doc('masterData');
+
+        // Variabel Dinamis (diisi secara otomatis dari Firestore)
+        let adminChecklistTemplate = [];
+        let masterRoles = [];
+        let masterDepartments = [];
+        let masterEntities = [];
+
+        // Checklist Template Khusus Review (Statis)
+        let baseReviewChecklistTemplate = [
+            { id: 'review1', label: 'Review Bulan 1', type: 'review', instructions: ["Jadwalkan meeting", "Siapkan form"], policies: ["Fokus adaptasi"] },
+            { id: 'review2', label: 'Review Bulan 2', type: 'review', instructions: ["Jadwalkan meeting"], policies: ["Fokus pencapaian target"] },
+            { id: 'review3', label: 'Review Bulan 3 (Final)', type: 'review', instructions: ["Siapkan form final probation"], policies: ["Menentukan kelanjutan kontrak"] }
+        ];
+
+        let employees = [];
+        let currentEmployeeId = null;
+        let currentEditingItemId = null;
+        let currentEditingItemType = null; 
+        let currentEditTableEmpId = null; 
+
         // --- SISTEM LOGIN (AUTHENTICATION) ---
         auth.onAuthStateChanged((user) => {
             if (user) {
@@ -528,35 +549,30 @@
             auth.signOut().then(() => showNotification("Berhasil Keluar Sistem."));
         }
 
-        // Variabel Data dan Template
-        // (Di skenario nyata, master data dan checklist di bawah ini idealnya juga diambil dari Firestore, 
-        // tapi kita biarkan hardcode di sini agar fungsi Detail Karyawan tidak rusak)
-        let adminChecklistTemplate = [
-            { id: 'data', label: 'Pengumpulan Data Diri', type: 'admin', instructions: ["Minta Foto KK", "Minta Karyawan Mengisi Di Data Karyawan", "Pastikan Pengisian Sesuai Standar HR"], policies: ["Wajib diisi ketika karyawan pertama kali masuk"] },
-            { id: 'kontrak', label: 'Tanda Tangan Kontrak', type: 'admin', instructions: ["Siapkan draf kontrak sesuai posisi", "Jadwalkan sesi tanda tangan"], policies: ["Kontrak harus ditandatangani paling lambat hari pertama kerja"] },
-            { id: 'bast', label: 'BAST Fasilitas Kerja', type: 'admin', instructions: ["Siapkan form BAST", "Serahkan fasilitas"], policies: ["Wajib ditandatangani kedua belah pihak"] },
-            { id: 'email', label: 'Pembuatan Akun Email', type: 'admin', instructions: ["Request ke IT"], policies: ["Format: nama.depan@perusahaan.com"] },
-            { id: 'presensi', label: 'Akses Sistem Presensi', type: 'admin', instructions: ["Daftarkan sidik jari/wajah"], policies: ["Wajib aktif hari pertama"] }
-        ];
-
-        let baseReviewChecklistTemplate = [
-            { id: 'review1', label: 'Review Bulan 1', type: 'review', instructions: ["Jadwalkan meeting", "Siapkan form"], policies: ["Fokus adaptasi"] },
-            { id: 'review2', label: 'Review Bulan 2', type: 'review', instructions: ["Jadwalkan meeting"], policies: ["Fokus pencapaian target"] },
-            { id: 'review3', label: 'Review Bulan 3 (Final)', type: 'review', instructions: ["Siapkan form final probation"], policies: ["Menentukan kelanjutan kontrak"] }
-        ];
-
-        let employees = [];
-        let currentEmployeeId = null;
-        let currentEditingItemId = null;
-        let currentEditingItemType = null; 
-        
-        let masterRoles = ["Staff", "Supervisor", "Manager"];
-        let masterDepartments = ["Operasional", "Sales Marketing", "Finance", "Engineering", "HR"];
-        let masterEntities = ["PT Alpha Jaya", "PT Beta Teknologi", "CV Gamma Sentosa"];
-        let currentEditTableEmpId = null; 
+        // --- MENGAMBIL DATA SINKRONISASI DARI FIRESTORE ---
+        async function loadMasterData() {
+            try {
+                const doc = await masterDataRef.get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data.adminChecklistTemplate) adminChecklistTemplate = data.adminChecklistTemplate;
+                    if (data.masterRoles) masterRoles = data.masterRoles;
+                    if (data.masterDepartments) masterDepartments = data.masterDepartments;
+                    if (data.masterEntities) masterEntities = data.masterEntities;
+                }
+                populateDropdowns();
+            } catch (error) {
+                console.error("Error mengambil master data:", error);
+                showNotification("Gagal memuat data pengaturan admin!");
+            }
+        }
 
         async function loadDataFromFirebase() {
             try {
+                // Pre-load data master admin terlebih dahulu
+                await loadMasterData();
+
+                // Ambil data karyawan
                 const snapshot = await db.collection("employees").get();
                 employees = snapshot.docs.map(doc => {
                     let data = doc.data();
@@ -566,7 +582,7 @@
                 renderTable();
             } catch (error) {
                 console.error("Error mengambil data:", error);
-                showNotification("Gagal memuat data dari Database!");
+                showNotification("Gagal memuat data karyawan!");
             }
         }
 
@@ -628,7 +644,7 @@
 
         function getEmployeeTemplates(emp) {
             let reviews = [...baseReviewChecklistTemplate];
-            if (emp.role.toLowerCase() === 'staff' && emp.department.toLowerCase() === 'sales marketing') {
+            if (emp.role && emp.role.toLowerCase() === 'staff' && emp.department && emp.department.toLowerCase() === 'sales marketing') {
                 reviews.unshift({ id: 'review_ojt', label: 'Review OJT', type: 'review', instructions: ["Evaluasi produk"], policies: ["Wajib lulus"] });
             }
             return { admin: adminChecklistTemplate, reviews: reviews };
@@ -642,7 +658,7 @@
             
             let doneCount = 0;
             allItems.forEach(item => {
-                if (emp.checklist[item.id] && emp.checklist[item.id].status === 'DONE') doneCount++;
+                if (emp.checklist && emp.checklist[item.id] && emp.checklist[item.id].status === 'DONE') doneCount++;
             });
             return Math.round((doneCount / allItems.length) * 100);
         }
@@ -703,10 +719,10 @@
                             </div>
                         </td>
                         <td class="p-4 border-b border-gray-100">
-                            <p class="text-sm font-medium text-gray-800">${emp.role}</p>
-                            <p class="text-[11px] text-gray-500">${emp.department}</p>
+                            <p class="text-sm font-medium text-gray-800">${emp.role || '-'}</p>
+                            <p class="text-[11px] text-gray-500">${emp.department || '-'}</p>
                         </td>
-                        <td class="p-4 border-b border-gray-100 text-sm font-medium text-gray-700">${emp.entity}</td>
+                        <td class="p-4 border-b border-gray-100 text-sm font-medium text-gray-700">${emp.entity || '-'}</td>
                         <td class="p-4 border-b border-gray-100 text-sm text-gray-600">${formatDateUI(emp.startDate)}</td>
                         <td class="p-4 border-b border-gray-100">
                             <div class="flex items-center mb-1">
@@ -791,7 +807,7 @@
             }
         }
 
-        // Functions untuk Edit Modal
+        // Functions untuk Edit Modal Karyawan
         function openEditEmployeeModal(empId) {
             currentEditTableEmpId = empId;
             const emp = employees.find(e => e.id === empId);
@@ -843,7 +859,7 @@
             }
         }
 
-        // Functions untuk Terminate
+        // Functions untuk Terminate / Selesaikan Onboarding
         function openTerminateModal() {
             if(!currentEmployeeId) return;
             document.getElementById('form-terminate').reset();
@@ -916,7 +932,7 @@
             currentEmployeeId = empId;
             const emp = employees.find(e => e.id === empId);
             document.getElementById('modal-name').innerText = emp.name;
-            document.getElementById('modal-role-entity').innerHTML = `${emp.role} | ${emp.department} &bull; ${emp.entity}`;
+            document.getElementById('modal-role-entity').innerHTML = `${emp.role || '-'} | ${emp.department || '-'} &bull; ${emp.entity || '-'}`;
             document.getElementById('modal-avatar').src = emp.avatar;
 
             refreshModalLists(emp);
@@ -979,6 +995,7 @@
         }
 
         function renderItemCard(emp, templateItem) {
+            if(!emp.checklist) emp.checklist = {};
             if(!emp.checklist[templateItem.id]) {
                 emp.checklist[templateItem.id] = { status: 'NONE', date: '', scheduledDate: '', actualDate: '', notes: '' };
             }
@@ -1014,12 +1031,25 @@
             currentEditingItemType = itemType;
             const emp = employees.find(e => e.id === currentEmployeeId);
             const tmpl = getEmployeeTemplates(emp)[itemType === 'admin' ? 'admin' : 'reviews'].find(t => t.id === itemId);
-            const data = emp.checklist[itemId];
+            const data = emp.checklist[itemId] || { status: 'NONE', date: '', scheduledDate: '', actualDate: '', notes: '' };
 
             document.getElementById('canvas-type').innerText = itemType === 'admin' ? 'Administratif' : 'Review Kinerja';
-            document.getElementById('canvas-title').innerText = tmpl.label;
-            document.getElementById('canvas-instructions').innerHTML = tmpl.instructions.map(i => `<li>${i}</li>`).join('');
-            document.getElementById('canvas-policies').innerHTML = tmpl.policies.map(i => `<li>${i}</li>`).join('');
+            document.getElementById('canvas-title').innerText = tmpl ? tmpl.label : 'Item';
+            
+            // Format instruksi & policy (Mendukung baik Array maupun Format WYSIWYG/HTML dari admin.html)
+            if (tmpl) {
+                if (Array.isArray(tmpl.instructions)) {
+                    document.getElementById('canvas-instructions').innerHTML = '<ul class="list-decimal list-outside ml-4 space-y-1">' + tmpl.instructions.map(i => `<li>${i}</li>`).join('') + '</ul>';
+                } else {
+                    document.getElementById('canvas-instructions').innerHTML = tmpl.instructions || '-';
+                }
+
+                if (Array.isArray(tmpl.policies)) {
+                    document.getElementById('canvas-policies').innerHTML = '<ul class="list-disc list-outside ml-4 space-y-1">' + tmpl.policies.map(i => `<li>${i}</li>`).join('') + '</ul>';
+                } else {
+                    document.getElementById('canvas-policies').innerHTML = tmpl.policies || '-';
+                }
+            }
 
             document.getElementById('input-status').value = data.status;
             document.getElementById('input-notes').value = data.notes || '';
@@ -1049,6 +1079,10 @@
         async function saveItemDetail() {
             if(!currentEmployeeId || !currentEditingItemId) return;
             const emp = employees.find(e => e.id === currentEmployeeId);
+            if(!emp.checklist) emp.checklist = {};
+            if(!emp.checklist[currentEditingItemId]) {
+                emp.checklist[currentEditingItemId] = {};
+            }
             const data = emp.checklist[currentEditingItemId];
 
             data.status = document.getElementById('input-status').value;
@@ -1065,7 +1099,7 @@
                 await db.collection("employees").doc(emp.id).update({
                     checklist: emp.checklist
                 });
-                showNotification(`Data '${currentEditingItemId}' disimpan.`);
+                showNotification(`Progress item berhasil disimpan.`);
                 closeItemCanvas();
                 refreshModalLists(emp);
             } catch(error) {
