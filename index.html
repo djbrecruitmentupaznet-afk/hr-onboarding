@@ -37,6 +37,7 @@
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
 
     <!-- LAYAR LOGIN -->
+    <!-- Catatan: Class 'hidden' ditambahkan di bawah agar tidak berkedip saat render awal -->
     <div id="login-view" class="hidden min-h-screen flex items-center justify-center p-4 bg-slate-900 relative overflow-hidden">
         <div class="absolute inset-0 bg-indigo-900/20"></div>
         <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden relative z-10 border border-slate-100">
@@ -197,6 +198,16 @@
                             <option value="51-75">51% - 75%</option>
                             <option value="76-100">76% - 100%</option>
                             <option value="terminated">Diberhentikan / Cancel</option>
+                        </select>
+                    </div>
+                    <div class="flex-grow min-w-[100px]">
+                        <label class="block text-xs font-bold text-gray-700 mb-1.5">Tampilkan</label>
+                        <select id="filter-limit" onchange="renderTable()" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="all">Semua</option>
+                            <option value="25">25 Baris</option>
+                            <option value="50">50 Baris</option>
+                            <option value="75">75 Baris</option>
+                            <option value="100">100 Baris</option>
                         </select>
                     </div>
                     <div>
@@ -678,9 +689,13 @@
             const filterDept = document.getElementById('filter-dept')?.value || '';
             const filterEntity = document.getElementById('filter-entity')?.value || '';
             const filterProgress = document.getElementById('filter-progress')?.value || '';
+            
+            const filterLimit = document.getElementById('filter-limit')?.value || 'all'; 
 
             let totalProgress = 0;
             let displayCount = 0;
+            
+            let renderCount = 0;
 
             employees.forEach(emp => {
                 const progress = calculateProgress(emp);
@@ -705,6 +720,12 @@
 
                 displayCount++;
                 totalProgress += progress;
+                
+                if (filterLimit !== 'all' && renderCount >= parseInt(filterLimit)) {
+                    return; 
+                }
+                renderCount++;
+
                 let progColor = progress === 100 ? 'bg-green-500' : (progress < 40 ? 'bg-orange-500' : 'bg-indigo-500');
                 
                 let badgeHtml = '';
@@ -767,6 +788,7 @@
             document.getElementById('filter-dept').value = '';
             document.getElementById('filter-entity').value = '';
             document.getElementById('filter-progress').value = '';
+            if(document.getElementById('filter-limit')) document.getElementById('filter-limit').value = 'all'; 
             renderTable();
         }
 
