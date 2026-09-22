@@ -422,6 +422,8 @@
                 id: 'data', 
                 label: 'Pengumpulan Data Diri', 
                 type: 'admin',
+                targetRoles: [],
+                targetDepts: [],
                 instructions: "<ul><li>Minta Foto KK (Kirim Ke Nomor Recruitment)</li><li>Minta Karyawan Mengisi Di Data Karyawan</li><li>Pastikan Pengisian Data Karyawan Sesuai Standar HR</li></ul>",
                 policies: "<ul><li>Setiap karyawan baru wajib mengisi Data Karyawan di Presensi</li><li>HR memastikan keabsahan data presensi tersebut</li></ul>"
             },
@@ -429,6 +431,8 @@
                 id: 'kontrak', 
                 label: 'Tanda Tangan Kontrak', 
                 type: 'admin', 
+                targetRoles: [],
+                targetDepts: [],
                 instructions: "<ul><li>Siapkan draf kontrak sesuai posisi</li><li>Jadwalkan sesi tanda tangan dengan karyawan</li></ul>", 
                 policies: "<ul><li>Kontrak harus ditandatangani paling lambat hari pertama kerja</li></ul>" 
             }
@@ -563,6 +567,8 @@
                     id: 'admin_custom_' + Date.now(),
                     label: label,
                     type: 'admin',
+                    targetRoles: [],
+                    targetDepts: [],
                     instructions: instHtml,
                     policies: polHtml
                 };
@@ -674,8 +680,6 @@
 
             await saveMasterData();
             showNotification("Setting Aspek Onboarding berhasil disimpan!");
-        }
-        
         }
 
         async function addMasterRole(e) {
