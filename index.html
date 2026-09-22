@@ -834,6 +834,10 @@
                                 <button onclick="openEditEmployeeModal('${emp.id}')" class="px-3 py-1.5 bg-white border border-slate-300 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-50 transition-all shadow-sm" title="Edit Data">
                                     <i class="fa-solid fa-pen"></i>
                                 </button>
+                                <!-- TOMBOL HAPUS (DELETE) -->
+                                <button onclick="deleteEmployee('${emp.id}', '${emp.name.replace(/'/g, "\\'")}')" class="px-3 py-1.5 bg-white border border-red-200 text-red-600 rounded-lg text-xs font-bold hover:bg-red-50 transition-all shadow-sm" title="Hapus Data">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -957,6 +961,23 @@
             } catch (error) {
                 console.error(error);
                 showNotification("Gagal memperbarui karyawan!");
+            }
+        }
+        
+        // FUNGSI HAPUS KARYAWAN (DELETE)
+        async function deleteEmployee(empId, empName) {
+            const isConfirmed = confirm(`Apakah Anda yakin ingin menghapus data karyawan ${empName}? \n\nTindakan ini bersifat permanen dan tidak dapat dibatalkan.`);
+            
+            if (isConfirmed) {
+                try {
+                    await db.collection("employees").doc(empId).delete();
+                    employees = employees.filter(e => e.id !== empId);
+                    renderTable();
+                    showNotification(`Data ${empName} berhasil dihapus.`);
+                } catch (error) {
+                    console.error("Error menghapus karyawan:", error);
+                    showNotification("Gagal menghapus data karyawan!");
+                }
             }
         }
 
