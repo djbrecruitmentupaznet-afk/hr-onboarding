@@ -694,10 +694,25 @@
 
         function getEmployeeTemplates(emp) {
             let reviews = [...baseReviewChecklistTemplate];
+            // Tambahan logik review khusus (misal: OJT untuk Sales)
             if (emp.role && emp.role.toLowerCase() === 'staff' && emp.department && emp.department.toLowerCase() === 'sales marketing') {
                 reviews.unshift({ id: 'review_ojt', label: 'Review OJT', type: 'review', instructions: ["Evaluasi produk"], policies: ["Wajib lulus"] });
             }
-            return { admin: adminChecklistTemplate, reviews: reviews };
+            
+            // LOGIKA FILTER KELENGKAPAN ADMINISTRATIF BERDASARKAN SETTING ADMIN
+            let filteredAdminItems = adminChecklistTemplate.filter(item => {
+                // Jika array kosong atau tidak ada, berarti item berlaku untuk semua orang
+                const noRoleLimit = !item.targetRoles || item.targetRoles.length === 0;
+                const noDeptLimit = !item.targetDepts || item.targetDepts.length === 0;
+
+                const roleMatch = noRoleLimit || item.targetRoles.includes(emp.role);
+                const deptMatch = noDeptLimit || item.targetDepts.includes(emp.department);
+
+                // Karyawan harus memenuhi kriteria Role DAN Departemen (jika dibatasi)
+                return roleMatch && deptMatch;
+            });
+
+            return { admin: filteredAdminItems, reviews: reviews };
         }
 
         function calculateProgress(emp) {
