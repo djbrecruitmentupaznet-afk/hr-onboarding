@@ -240,54 +240,90 @@
                     </div>
                 </div>
 
-                <!-- TAB 3: MAPPING ASPEK (BARU) -->
+                <!-- TAB 3: MAPPING ASPEK (DUA KOLOM) -->
                 <div id="admin-tab-mapping" class="hidden">
-                    <div class="max-w-3xl bg-white rounded-2xl shadow-sm border border-indigo-200 p-8 bg-indigo-50/30">
-                        <div class="flex items-center gap-3 mb-6 border-b border-indigo-100 pb-4">
-                            <div class="bg-indigo-100 text-indigo-600 p-2.5 rounded-xl">
-                                <i class="fa-solid fa-network-wired text-xl"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-xl font-bold text-indigo-800 leading-tight">Pemilihan Aspek Onboarding</h3>
-                                <p class="text-sm text-indigo-600 mt-1">Atur aspek onboarding mana saja yang diwajibkan untuk Divisi dan Jabatan tertentu.</p>
-                            </div>
-                        </div>
-
-                        <div class="mb-5">
-                            <label class="block text-sm font-bold text-gray-700 mb-2">1. Pilih Item Onboarding:</label>
-                            <select id="map-item-select" onchange="loadMapping()" class="w-full text-sm rounded-xl border border-gray-300 px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500 bg-white shadow-sm"></select>
-                        </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <!-- Role Setting -->
-                            <div>
-                                <div class="flex justify-between items-center mb-2">
-                                    <label class="block text-sm font-bold text-gray-700">2. Berlaku untuk Jabatan:</label>
-                                    <label class="text-xs text-indigo-600 font-bold cursor-pointer hover:text-indigo-800 bg-indigo-100 px-2 py-1 rounded">
-                                        <input type="checkbox" id="cb-all-roles" onchange="toggleAll('role')" class="mr-1 rounded text-indigo-600"> Pilih Semua
-                                    </label>
+                        <!-- KOLOM KIRI: Form Pemilihan Aspek -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-indigo-200 p-8 bg-indigo-50/30 flex flex-col h-full">
+                            <div class="flex items-center gap-3 mb-6 border-b border-indigo-100 pb-4">
+                                <div class="bg-indigo-100 text-indigo-600 p-2.5 rounded-xl">
+                                    <i class="fa-solid fa-network-wired text-xl"></i>
                                 </div>
-                                <div id="map-roles-container" class="space-y-2 max-h-48 overflow-y-auto text-sm p-3 bg-white border border-gray-200 rounded-xl shadow-inner"></div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-indigo-800 leading-tight">Pemilihan Aspek Onboarding</h3>
+                                    <p class="text-sm text-indigo-600 mt-1">Atur aspek onboarding mana saja yang diwajibkan untuk Divisi dan Jabatan tertentu.</p>
+                                </div>
+                            </div>
+
+                            <div class="mb-5">
+                                <label class="block text-sm font-bold text-gray-700 mb-2">1. Pilih Item Onboarding:</label>
+                                <select id="map-item-select" onchange="loadMapping()" class="w-full text-sm rounded-xl border border-gray-300 px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500 bg-white shadow-sm"></select>
                             </div>
                             
-                            <!-- Dept Setting -->
-                            <div>
-                                <div class="flex justify-between items-center mb-2">
-                                    <label class="block text-sm font-bold text-gray-700">3. Berlaku untuk Divisi:</label>
-                                    <label class="text-xs text-indigo-600 font-bold cursor-pointer hover:text-indigo-800 bg-indigo-100 px-2 py-1 rounded">
-                                        <input type="checkbox" id="cb-all-depts" onchange="toggleAll('dept')" class="mr-1 rounded text-indigo-600"> Pilih Semua
-                                    </label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 flex-grow">
+                                <!-- Role Setting -->
+                                <div class="flex flex-col">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <label class="block text-sm font-bold text-gray-700">2. Berlaku untuk Jabatan:</label>
+                                        <label class="text-[11px] text-indigo-600 font-bold cursor-pointer hover:text-indigo-800 bg-indigo-100 px-2 py-1 rounded">
+                                            <input type="checkbox" id="cb-all-roles" onchange="toggleAll('role')" class="mr-1 rounded text-indigo-600"> Pilih Semua
+                                        </label>
+                                    </div>
+                                    <div id="map-roles-container" class="space-y-2 flex-grow overflow-y-auto text-sm p-3 bg-white border border-gray-200 rounded-xl shadow-inner max-h-52"></div>
                                 </div>
-                                <div id="map-depts-container" class="space-y-2 max-h-48 overflow-y-auto text-sm p-3 bg-white border border-gray-200 rounded-xl shadow-inner"></div>
+                                
+                                <!-- Dept Setting -->
+                                <div class="flex flex-col">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <label class="block text-sm font-bold text-gray-700">3. Berlaku untuk Divisi:</label>
+                                        <label class="text-[11px] text-indigo-600 font-bold cursor-pointer hover:text-indigo-800 bg-indigo-100 px-2 py-1 rounded">
+                                            <input type="checkbox" id="cb-all-depts" onchange="toggleAll('dept')" class="mr-1 rounded text-indigo-600"> Pilih Semua
+                                        </label>
+                                    </div>
+                                    <div id="map-depts-container" class="space-y-2 flex-grow overflow-y-auto text-sm p-3 bg-white border border-gray-200 rounded-xl shadow-inner max-h-52"></div>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-center pt-4 border-t border-indigo-100">
+                                <p class="text-xs text-gray-500 leading-tight w-2/3"><i class="fa-solid fa-circle-info mr-1"></i> Biarkan semua kotak kosong jika item ini <b>bersifat UMUM</b> (berlaku untuk semua karyawan).</p>
+                                <button onclick="saveMapping()" class="px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 text-sm font-bold transition-all shadow-md active:scale-[0.98] flex items-center gap-2">
+                                    <i class="fa-solid fa-floppy-disk"></i> Simpan Setting
+                                </button>
                             </div>
                         </div>
 
-                        <div class="flex justify-between items-center pt-2">
-                            <p class="text-xs text-gray-500 leading-tight w-2/3"><i class="fa-solid fa-circle-info mr-1"></i> Biarkan semua kotak kosong jika item ini <b>bersifat UMUM</b> (berlaku untuk semua karyawan tanpa memandang jabatan/divisi).</p>
-                            <button onclick="saveMapping()" class="px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 text-sm font-bold transition-all shadow-md active:scale-[0.98] flex items-center gap-2">
-                                <i class="fa-solid fa-floppy-disk"></i> Simpan Setting
-                            </button>
+                        <!-- KOLOM KANAN: Simulasi / Summary -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-emerald-200 p-8 bg-emerald-50/30 flex flex-col h-full">
+                            <div class="flex items-center gap-3 mb-6 border-b border-emerald-100 pb-4">
+                                <div class="bg-emerald-100 text-emerald-600 p-2.5 rounded-xl">
+                                    <i class="fa-solid fa-eye text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-emerald-800 leading-tight">Simulasi Summary</h3>
+                                    <p class="text-sm text-emerald-600 mt-1">Cek item onboarding yang akan didapatkan karyawan.</p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 mb-6 shrink-0">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">Cek Jabatan:</label>
+                                    <select id="preview-role" onchange="renderSummaryPreview()" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 bg-white shadow-sm"></select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">Cek Divisi:</label>
+                                    <select id="preview-dept" onchange="renderSummaryPreview()" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 bg-white shadow-sm"></select>
+                                </div>
+                            </div>
+                            
+                            <div id="summary-preview-list" class="space-y-4 flex-grow overflow-y-auto pr-2 max-h-[350px]">
+                                <div class="text-center p-8 text-gray-500 text-sm border-2 border-dashed border-emerald-200 rounded-xl bg-emerald-50/50">
+                                    <i class="fa-solid fa-list-check text-3xl text-emerald-300 mb-2"></i><br>
+                                    Silakan pilih <b>Jabatan</b> dan <b>Divisi</b> di atas untuk melihat simulasi hasil pemetaan.
+                                </div>
+                            </div>
                         </div>
+
                     </div>
                 </div>
 
@@ -661,6 +697,18 @@
                 
                 if (currentVal) loadMapping(); 
             }
+
+            // Update Opsi di Kolom Simulasi/Preview
+            const previewRole = document.getElementById('preview-role');
+            const previewDept = document.getElementById('preview-dept');
+            if (previewRole && previewDept) {
+                const curRole = previewRole.value;
+                const curDept = previewDept.value;
+                previewRole.innerHTML = '<option value="">-- Pilih Jabatan --</option>' + masterRoles.map(r => `<option value="${r}">${r}</option>`).join('');
+                previewDept.innerHTML = '<option value="">-- Pilih Divisi --</option>' + masterDepartments.map(d => `<option value="${d}">${d}</option>`).join('');
+                if(curRole) previewRole.value = curRole;
+                if(curDept) previewDept.value = curDept;
+            }
         }
 
         // --- LOGIKA MAPPING (TAB KE-3) & CHECK ALL ---
@@ -713,6 +761,64 @@
 
             await saveMasterData();
             showNotification("Setting Aspek Onboarding berhasil disimpan!");
+            
+            // Render ulang panel simulasi untuk melihat efek perubahan langsung
+            renderSummaryPreview();
+        }
+
+        // --- FUNGSI PREVIEW / SIMULASI MAPPING ---
+        function renderSummaryPreview() {
+            const role = document.getElementById('preview-role').value;
+            const dept = document.getElementById('preview-dept').value;
+            const listDiv = document.getElementById('summary-preview-list');
+
+            if (!role || !dept) {
+                listDiv.innerHTML = `
+                    <div class="text-center p-8 text-gray-500 text-sm border-2 border-dashed border-emerald-200 rounded-xl bg-emerald-50/50">
+                        <i class="fa-solid fa-list-check text-3xl text-emerald-300 mb-2"></i><br>
+                        Silakan pilih <b>Jabatan</b> dan <b>Divisi</b> di atas untuk melihat simulasi hasil pemetaan.
+                    </div>`;
+                return;
+            }
+
+            const filteredItems = adminChecklistTemplate.filter(item => {
+                const noRoleLimit = !item.targetRoles || item.targetRoles.length === 0;
+                const noDeptLimit = !item.targetDepts || item.targetDepts.length === 0;
+
+                const roleMatch = noRoleLimit || item.targetRoles.includes(role);
+                const deptMatch = noDeptLimit || item.targetDepts.includes(dept);
+
+                return roleMatch && deptMatch;
+            });
+
+            if (filteredItems.length === 0) {
+                listDiv.innerHTML = `
+                    <div class="text-center p-8 text-gray-500 text-sm border-2 border-dashed border-emerald-200 rounded-xl bg-emerald-50/50">
+                        Tidak ada item onboarding yang diwajibkan untuk kombinasi Jabatan dan Divisi tersebut.
+                    </div>`;
+                return;
+            }
+
+            listDiv.innerHTML = filteredItems.map(tmpl => {
+                const instHtml = `<div class="quill-content text-[11px] text-gray-600">${formatToHtml(tmpl.instructions)}</div>`;
+                const polHtml = `<div class="quill-content text-[11px] text-gray-600">${formatToHtml(tmpl.policies)}</div>`;
+                
+                return `
+                    <div class="bg-white border border-emerald-100 rounded-xl p-4 shadow-sm relative">
+                        <h4 class="font-bold text-emerald-700 text-sm mb-2 border-b border-emerald-50 pb-2"><i class="fa-solid fa-tag text-xs mr-1 opacity-70"></i> ${tmpl.label}</h4>
+                        <div class="space-y-3 mt-3">
+                            <div>
+                                <span class="text-[9px] uppercase font-bold text-gray-400 block mb-1">Instruksi Kerja</span>
+                                ${instHtml}
+                            </div>
+                            <div>
+                                <span class="text-[9px] uppercase font-bold text-gray-400 block mb-1">Policy / Kebijakan</span>
+                                ${polHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
         async function addMasterRole(e) {
