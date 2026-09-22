@@ -158,11 +158,14 @@
                     <p class="text-sm text-gray-500 mt-1">Kelola data master dan pengaturan sistem onboarding.</p>
                 </div>
 
-                <div class="flex gap-6 mb-8 border-b border-gray-200">
-                    <button onclick="switchAdminTab('template')" id="tab-btn-template" class="pb-3 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 transition-colors">Item Onboarding</button>
-                    <button onclick="switchAdminTab('master')" id="tab-btn-master" class="pb-3 text-sm font-bold text-gray-500 border-b-2 border-transparent hover:text-gray-700 transition-colors">Role, Divisi & Entitas</button>
+                <!-- TABS -->
+                <div class="flex gap-6 mb-8 border-b border-gray-200 overflow-x-auto">
+                    <button onclick="switchAdminTab('template')" id="tab-btn-template" class="pb-3 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 transition-colors whitespace-nowrap">Item Onboarding</button>
+                    <button onclick="switchAdminTab('master')" id="tab-btn-master" class="pb-3 text-sm font-bold text-gray-500 border-b-2 border-transparent hover:text-gray-700 transition-colors whitespace-nowrap">Role, Divisi & Entitas</button>
+                    <button onclick="switchAdminTab('mapping')" id="tab-btn-mapping" class="pb-3 text-sm font-bold text-gray-500 border-b-2 border-transparent hover:text-gray-700 transition-colors whitespace-nowrap">Pemilihan Aspek Onboarding</button>
                 </div>
 
+                <!-- TAB 1: ITEM ONBOARDING -->
                 <div id="admin-tab-template" class="block">
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         <div class="lg:col-span-1">
@@ -205,9 +208,9 @@
                     </div>
                 </div>
 
+                <!-- TAB 2: MASTER DATA -->
                 <div id="admin-tab-master" class="hidden">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <!-- Master Jabatan -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                             <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Master Jabatan</h3>
                             <form onsubmit="addMasterRole(event)" class="flex gap-3 mb-4">
@@ -217,7 +220,6 @@
                             <div id="list-master-role" class="space-y-2 max-h-[300px] overflow-y-auto pr-2"></div>
                         </div>
                         
-                        <!-- Master Divisi -->
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                             <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Master Divisi</h3>
                             <form onsubmit="addMasterDept(event)" class="flex gap-3 mb-4">
@@ -227,7 +229,6 @@
                             <div id="list-master-dept" class="space-y-2 max-h-[300px] overflow-y-auto pr-2"></div>
                         </div>
                         
-                        <!-- Master Entitas -->
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                             <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Master Entitas</h3>
                             <form onsubmit="addMasterEntity(event)" class="flex gap-3 mb-4">
@@ -236,31 +237,61 @@
                             </form>
                             <div id="list-master-entity" class="space-y-2 max-h-[300px] overflow-y-auto pr-2"></div>
                         </div>
+                    </div>
+                </div>
 
-                        <!-- PANEL BARU: Pemilihan Aspek Onboarding -->
-                        <div class="bg-white rounded-2xl shadow-sm border border-indigo-200 p-6 bg-indigo-50/30">
-                            <h3 class="text-lg font-bold text-indigo-800 mb-4 border-b border-indigo-100 pb-2">Pemilihan Aspek Onboarding</h3>
-                            <div class="mb-3">
-                                <label class="block text-xs font-bold text-gray-700 mb-1">1. Pilih Item Onboarding:</label>
-                                <select id="map-item-select" onchange="loadMapping()" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500 bg-white"></select>
+                <!-- TAB 3: MAPPING ASPEK (BARU) -->
+                <div id="admin-tab-mapping" class="hidden">
+                    <div class="max-w-3xl bg-white rounded-2xl shadow-sm border border-indigo-200 p-8 bg-indigo-50/30">
+                        <div class="flex items-center gap-3 mb-6 border-b border-indigo-100 pb-4">
+                            <div class="bg-indigo-100 text-indigo-600 p-2.5 rounded-xl">
+                                <i class="fa-solid fa-network-wired text-xl"></i>
                             </div>
-                            <div class="mb-3">
-                                <label class="block text-xs font-bold text-gray-700 mb-1">2. Berlaku untuk Jabatan:</label>
-                                <div id="map-roles-container" class="space-y-1.5 max-h-24 overflow-y-auto text-sm p-2 bg-white border border-gray-200 rounded-lg"></div>
+                            <div>
+                                <h3 class="text-xl font-bold text-indigo-800 leading-tight">Pemilihan Aspek Onboarding</h3>
+                                <p class="text-sm text-indigo-600 mt-1">Atur aspek onboarding mana saja yang diwajibkan untuk Divisi dan Jabatan tertentu.</p>
                             </div>
-                            <div class="mb-4">
-                                <label class="block text-xs font-bold text-gray-700 mb-1">3. Berlaku untuk Divisi:</label>
-                                <div id="map-depts-container" class="space-y-1.5 max-h-24 overflow-y-auto text-sm p-2 bg-white border border-gray-200 rounded-lg"></div>
+                        </div>
+
+                        <div class="mb-5">
+                            <label class="block text-sm font-bold text-gray-700 mb-2">1. Pilih Item Onboarding:</label>
+                            <select id="map-item-select" onchange="loadMapping()" class="w-full text-sm rounded-xl border border-gray-300 px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500 bg-white shadow-sm"></select>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <!-- Role Setting -->
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="block text-sm font-bold text-gray-700">2. Berlaku untuk Jabatan:</label>
+                                    <label class="text-xs text-indigo-600 font-bold cursor-pointer hover:text-indigo-800 bg-indigo-100 px-2 py-1 rounded">
+                                        <input type="checkbox" id="cb-all-roles" onchange="toggleAll('role')" class="mr-1 rounded text-indigo-600"> Pilih Semua
+                                    </label>
+                                </div>
+                                <div id="map-roles-container" class="space-y-2 max-h-48 overflow-y-auto text-sm p-3 bg-white border border-gray-200 rounded-xl shadow-inner"></div>
                             </div>
-                            <button onclick="saveMapping()" class="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium transition-colors shadow-sm flex items-center justify-center gap-2">
+                            
+                            <!-- Dept Setting -->
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="block text-sm font-bold text-gray-700">3. Berlaku untuk Divisi:</label>
+                                    <label class="text-xs text-indigo-600 font-bold cursor-pointer hover:text-indigo-800 bg-indigo-100 px-2 py-1 rounded">
+                                        <input type="checkbox" id="cb-all-depts" onchange="toggleAll('dept')" class="mr-1 rounded text-indigo-600"> Pilih Semua
+                                    </label>
+                                </div>
+                                <div id="map-depts-container" class="space-y-2 max-h-48 overflow-y-auto text-sm p-3 bg-white border border-gray-200 rounded-xl shadow-inner"></div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-2">
+                            <p class="text-xs text-gray-500 leading-tight w-2/3"><i class="fa-solid fa-circle-info mr-1"></i> Biarkan semua kotak kosong jika item ini <b>bersifat UMUM</b> (berlaku untuk semua karyawan tanpa memandang jabatan/divisi).</p>
+                            <button onclick="saveMapping()" class="px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 text-sm font-bold transition-all shadow-md active:scale-[0.98] flex items-center gap-2">
                                 <i class="fa-solid fa-floppy-disk"></i> Simpan Setting
                             </button>
-                            <p class="text-[10px] text-gray-500 mt-2 leading-tight">*Kosongkan semua centang jika item ini bersifat umum (berlaku untuk semua jabatan & divisi).</p>
                         </div>
                     </div>
                 </div>
-            </main>
 
+            </main>
         </div> <!-- End Main Content -->
     </div> <!-- END APLIKASI UTAMA -->
 
@@ -293,10 +324,8 @@
         const db = firebase.firestore();
         // ----------------------------
 
-        // Referensi Database untuk Master Data
         const masterDataRef = db.collection('settings').doc('masterData');
 
-        // Fungsi Load Master Data dari Firestore
         async function loadMasterData() {
             try {
                 const doc = await masterDataRef.get();
@@ -307,17 +336,15 @@
                     if (data.masterDepartments) masterDepartments = data.masterDepartments;
                     if (data.masterEntities) masterEntities = data.masterEntities;
                 } else {
-                    // Jika belum ada dokumen masterData, simpan data default
                     await saveMasterData();
                 }
-                renderAdminTemplates(); // Render UI setelah data termuat
+                renderAdminTemplates(); 
             } catch (error) {
                 console.error("Error loading master data:", error);
                 showNotification("Gagal memuat data pengaturan dari database!");
             }
         }
 
-        // Fungsi Save Master Data ke Firestore
         async function saveMasterData() {
             try {
                 await masterDataRef.set({
@@ -338,8 +365,6 @@
                 document.getElementById('login-view').classList.add('hidden');
                 document.getElementById('app-view').classList.remove('hidden');
                 document.getElementById('app-view').classList.add('flex');
-                
-                // Render form & data khusus admin
                 loadMasterData();
             } else {
                 document.getElementById('login-view').classList.remove('hidden');
@@ -443,7 +468,6 @@
         let masterEntities = ["PT Alpha Jaya", "PT Beta Teknologi", "CV Gamma Sentosa"];
         let editingTemplateIndex = null; 
 
-        // Fungsi Helper untuk jaga-jaga apabila format datanya aslinya Array (Konversi ke HTML)
         const formatToHtml = (content) => {
             if (Array.isArray(content)) {
                 return `<ul>` + content.map(i => `<li>${i}</li>`).join('') + `</ul>`;
@@ -451,18 +475,22 @@
             return content;
         };
 
+        // --- FUNGSI TAB NAVIGASI BARU ---
         function switchAdminTab(tab) {
-            if(tab === 'template') {
-                document.getElementById('admin-tab-template').classList.remove('hidden');
-                document.getElementById('admin-tab-master').classList.add('hidden');
-                document.getElementById('tab-btn-template').className = "pb-3 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 transition-colors";
-                document.getElementById('tab-btn-master').className = "pb-3 text-sm font-bold text-gray-500 border-b-2 border-transparent hover:text-gray-700 transition-colors";
-            } else {
-                document.getElementById('admin-tab-template').classList.add('hidden');
-                document.getElementById('admin-tab-master').classList.remove('hidden');
-                document.getElementById('tab-btn-template').className = "pb-3 text-sm font-bold text-gray-500 border-b-2 border-transparent hover:text-gray-700 transition-colors";
-                document.getElementById('tab-btn-master').className = "pb-3 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 transition-colors";
-            }
+            const tabs = ['template', 'master', 'mapping'];
+            
+            tabs.forEach(t => {
+                const content = document.getElementById(`admin-tab-${t}`);
+                const btn = document.getElementById(`tab-btn-${t}`);
+                
+                if (t === tab) {
+                    content.classList.remove('hidden');
+                    btn.className = "pb-3 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 transition-colors whitespace-nowrap";
+                } else {
+                    content.classList.add('hidden');
+                    btn.className = "pb-3 text-sm font-bold text-gray-500 border-b-2 border-transparent hover:text-gray-700 transition-colors whitespace-nowrap";
+                }
+            });
         }
 
         // TAMPILKAN LIST ITEM ADMINISTRATIF
@@ -501,16 +529,11 @@
             });
         }
 
-        // --- SISTEM CRUD UNTUK ITEM ADMINISTRATIF (DENGAN WYSIWYG) ---
-
-        // Masukkan data ke Editor saat tombol Edit ditekan
         function editAdminTemplate(index) {
             editingTemplateIndex = index;
             const tmpl = adminChecklistTemplate[index];
             
             document.getElementById('tmpl-label').value = tmpl.label;
-            
-            // Masukkan format HTML ke dalam editor Quill
             instQuill.root.innerHTML = formatToHtml(tmpl.instructions);
             polQuill.root.innerHTML = formatToHtml(tmpl.policies);
 
@@ -525,7 +548,6 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Batal mengedit dan kosongkan editor
         function cancelEditTemplate() {
             editingTemplateIndex = null;
             document.getElementById('form-add-template').reset();
@@ -541,12 +563,10 @@
             document.getElementById('btn-submit-template').classList.add('w-full');
         }
 
-        // Simpan Form (Baik Tambah Baru maupun Update)
         async function saveNewAdminTemplate(e) {
             e.preventDefault();
             const label = document.getElementById('tmpl-label').value;
             
-            // Ambil konten HTML dari editor teks
             const instHtml = instQuill.root.innerHTML === '<p><br></p>' ? '' : instQuill.root.innerHTML;
             const polHtml = polQuill.root.innerHTML === '<p><br></p>' ? '' : polQuill.root.innerHTML;
 
@@ -556,13 +576,11 @@
             }
 
             if (editingTemplateIndex !== null) {
-                // Update Data Lama
                 adminChecklistTemplate[editingTemplateIndex].label = label;
                 adminChecklistTemplate[editingTemplateIndex].instructions = instHtml; 
                 adminChecklistTemplate[editingTemplateIndex].policies = polHtml; 
                 showNotification('Item berhasil diperbarui!');
             } else {
-                // Tambah Data Baru
                 const newItem = {
                     id: 'admin_custom_' + Date.now(),
                     label: label,
@@ -576,9 +594,7 @@
                 showNotification('Item Administratif berhasil ditambahkan!');
             }
 
-            // Sync ke Firestore
             await saveMasterData();
-            
             renderAdminTemplates();
             cancelEditTemplate(); 
         }
@@ -586,10 +602,7 @@
         async function deleteAdminTemplate(index) {
             if(confirm("Yakin ingin menghapus item ini?")) {
                 adminChecklistTemplate.splice(index, 1);
-                
-                // Sync ke Firestore
                 await saveMasterData();
-                
                 renderAdminTemplates();
                 showNotification('Item berhasil dihapus.');
             }
@@ -638,15 +651,31 @@
                 
                 const rolesContainer = document.getElementById('map-roles-container');
                 rolesContainer.innerHTML = masterRoles.map(r => `
-                    <label class="flex items-center gap-2 text-gray-700 cursor-pointer"><input type="checkbox" value="${r}" class="map-role-cb rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4"> ${r}</label>
+                    <label class="flex items-center gap-2 text-gray-700 cursor-pointer hover:bg-slate-50 p-1 rounded transition-colors"><input type="checkbox" value="${r}" class="map-role-cb rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4" onchange="updateSelectAllState('role')"> ${r}</label>
                 `).join('');
 
                 const deptsContainer = document.getElementById('map-depts-container');
                 deptsContainer.innerHTML = masterDepartments.map(d => `
-                    <label class="flex items-center gap-2 text-gray-700 cursor-pointer"><input type="checkbox" value="${d}" class="map-dept-cb rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4"> ${d}</label>
+                    <label class="flex items-center gap-2 text-gray-700 cursor-pointer hover:bg-slate-50 p-1 rounded transition-colors"><input type="checkbox" value="${d}" class="map-dept-cb rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4" onchange="updateSelectAllState('dept')"> ${d}</label>
                 `).join('');
                 
                 if (currentVal) loadMapping(); 
+            }
+        }
+
+        // --- LOGIKA MAPPING (TAB KE-3) & CHECK ALL ---
+        function toggleAll(type) {
+            const isChecked = document.getElementById(`cb-all-${type}s`).checked;
+            const cbs = document.querySelectorAll(`.map-${type}-cb`);
+            cbs.forEach(cb => cb.checked = isChecked);
+        }
+
+        function updateSelectAllState(type) {
+            const allCbs = document.querySelectorAll(`.map-${type}-cb`);
+            const checkedCbs = document.querySelectorAll(`.map-${type}-cb:checked`);
+            const selectAllCb = document.getElementById(`cb-all-${type}s`);
+            if (selectAllCb) {
+                selectAllCb.checked = (allCbs.length > 0 && allCbs.length === checkedCbs.length);
             }
         }
 
@@ -660,6 +689,10 @@
             
             const deptCbs = document.querySelectorAll('.map-dept-cb');
             deptCbs.forEach(cb => cb.checked = item.targetDepts && item.targetDepts.includes(cb.value));
+
+            // Perbarui status checkbox "Select All"
+            updateSelectAllState('role');
+            updateSelectAllState('dept');
         }
 
         async function saveMapping() {
@@ -688,7 +721,7 @@
             const val = input.value.trim();
             if (val && !masterRoles.includes(val)) {
                 masterRoles.push(val);
-                await saveMasterData(); // Sync ke Firestore
+                await saveMasterData(); 
                 input.value = '';
                 renderMasterData();
                 showNotification("Posisi baru berhasil ditambahkan.");
@@ -696,7 +729,7 @@
         }
         async function deleteMasterRole(index) { 
             masterRoles.splice(index, 1); 
-            await saveMasterData(); // Sync ke Firestore
+            await saveMasterData(); 
             renderMasterData(); 
         }
 
@@ -706,7 +739,7 @@
             const val = input.value.trim();
             if (val && !masterDepartments.includes(val)) {
                 masterDepartments.push(val);
-                await saveMasterData(); // Sync ke Firestore
+                await saveMasterData(); 
                 input.value = '';
                 renderMasterData();
                 showNotification("Departemen baru berhasil ditambahkan.");
@@ -714,7 +747,7 @@
         }
         async function deleteMasterDept(index) { 
             masterDepartments.splice(index, 1); 
-            await saveMasterData(); // Sync ke Firestore
+            await saveMasterData(); 
             renderMasterData(); 
         }
 
@@ -724,7 +757,7 @@
             const val = input.value.trim();
             if (val && !masterEntities.includes(val)) {
                 masterEntities.push(val);
-                await saveMasterData(); // Sync ke Firestore
+                await saveMasterData(); 
                 input.value = '';
                 renderMasterData();
                 showNotification("Entitas baru berhasil ditambahkan.");
@@ -732,7 +765,7 @@
         }
         async function deleteMasterEntity(index) { 
             masterEntities.splice(index, 1); 
-            await saveMasterData(); // Sync ke Firestore
+            await saveMasterData(); 
             renderMasterData(); 
         }
     </script>
