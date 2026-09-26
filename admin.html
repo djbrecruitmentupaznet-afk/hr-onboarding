@@ -823,8 +823,17 @@
                             </button>
                         </div>
 
-                        <h4 class="font-bold text-emerald-700 text-sm mb-2 border-b border-emerald-50 pb-2"><i class="fa-solid fa-tag text-xs mr-1 opacity-70"></i> ${tmpl.label}</h4>
-                        <div class="space-y-3 mt-3">
+                        <div class="flex justify-between items-center mb-1">
+                            <h4 class="font-bold text-emerald-700 text-sm"><i class="fa-solid fa-tag text-xs mr-1 opacity-70"></i> ${tmpl.label}</h4>
+                        </div>
+                        
+                        <!-- TOMBOL TOGGLE (LIHAT SELENGKAPNYA) -->
+                        <button onclick="toggleSummaryDetail('detail-${tmpl.id}')" class="text-[10px] font-bold text-emerald-600 hover:text-emerald-800 transition-colors flex items-center gap-1 mt-1 outline-none">
+                            <span id="text-detail-${tmpl.id}">Lihat Selengkapnya</span> <i id="icon-detail-${tmpl.id}" class="fa-solid fa-chevron-down"></i>
+                        </button>
+
+                        <!-- BAGIAN DETAIL (SEMBUNYI SECARA DEFAULT) -->
+                        <div id="detail-${tmpl.id}" class="hidden space-y-3 mt-3 pt-3 border-t border-dashed border-emerald-100">
                             <div>
                                 <span class="text-[9px] uppercase font-bold text-gray-400 block mb-1">Instruksi Kerja</span>
                                 ${instHtml}
@@ -837,6 +846,23 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        // FUNGSI TOGGLE LIHAT SELENGKAPNYA
+        function toggleSummaryDetail(id) {
+            const detailDiv = document.getElementById(id);
+            const textSpan = document.getElementById('text-' + id);
+            const iconI = document.getElementById('icon-' + id);
+            
+            if (detailDiv.classList.contains('hidden')) {
+                detailDiv.classList.remove('hidden');
+                textSpan.innerText = 'Sembunyikan Detail';
+                iconI.classList.replace('fa-chevron-down', 'fa-chevron-up');
+            } else {
+                detailDiv.classList.add('hidden');
+                textSpan.innerText = 'Lihat Selengkapnya';
+                iconI.classList.replace('fa-chevron-up', 'fa-chevron-down');
+            }
         }
 
         // FUNGSI BARU UNTUK MERUBAH URUTAN (REORDERING)
