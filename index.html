@@ -26,7 +26,8 @@
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         .sidebar-transition { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .canvas-transition { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        /* Style untuk menampilkan HTML dari editor (seperti di admin) */
+        
+        /* Style untuk menampilkan HTML dari editor agar rapi di panel kanan */
         .quill-content ul { list-style-type: disc !important; padding-left: 1.5rem !important; margin-top: 0.25rem; margin-bottom: 0.5rem; }
         .quill-content ol { list-style-type: decimal !important; padding-left: 1.5rem !important; margin-top: 0.25rem; margin-bottom: 0.5rem; }
         .quill-content p { margin-bottom: 0.25rem; }
@@ -223,11 +224,11 @@
                         <div class="flex-grow min-w-[100px] md:border-l md:border-gray-200 md:pl-4">
                             <label class="block text-xs font-bold text-gray-700 mb-1.5">Batasi Tampilan</label>
                             <select id="filter-limit" onchange="renderTable()" class="w-full text-sm rounded-lg border border-gray-300 px-3 py-2 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500">
-                                <option value="all">Semua Baris</option>
-                                <option value="25">25 Baris</option>
+                                <option value="25" selected>25 Baris</option>
                                 <option value="50">50 Baris</option>
                                 <option value="75">75 Baris</option>
                                 <option value="100">100 Baris</option>
+                                <option value="all">Semua Baris</option>
                             </select>
                         </div>
                         <div>
@@ -243,13 +244,13 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse min-w-[1000px]">
                             <thead>
-                                <tr class="bg-slate-50/80 border-b border-gray-200 text-xs uppercase tracking-wider text-gray-500">
-                                    <th class="p-4 font-semibold w-[25%]">Nama Karyawan</th>
-                                    <th class="p-4 font-semibold w-[20%]">Posisi & Dept</th>
-                                    <th class="p-4 font-semibold w-[15%]">Entitas</th>
-                                    <th class="p-4 font-semibold w-[15%]">Tgl Masuk</th>
-                                    <th class="p-4 font-semibold w-[15%]">Progress</th>
-                                    <th class="p-4 font-semibold w-[10%] text-center">Aksi</th>
+                                <tr class="bg-slate-50/80 border-b border-gray-200 text-xs uppercase tracking-wider text-gray-500 select-none">
+                                    <th class="p-4 font-semibold w-[25%] cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition-colors" onclick="handleSort('name')">Nama Karyawan <i id="sort-icon-name" class="fa-solid fa-sort ml-1 opacity-40"></i></th>
+                                    <th class="p-4 font-semibold w-[20%] cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition-colors" onclick="handleSort('role')">Posisi & Dept <i id="sort-icon-role" class="fa-solid fa-sort ml-1 opacity-40"></i></th>
+                                    <th class="p-4 font-semibold w-[15%] cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition-colors" onclick="handleSort('entity')">Entitas <i id="sort-icon-entity" class="fa-solid fa-sort ml-1 opacity-40"></i></th>
+                                    <th class="p-4 font-semibold w-[15%] cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition-colors" onclick="handleSort('date')">Tgl Masuk <i id="sort-icon-date" class="fa-solid fa-sort ml-1 opacity-40"></i></th>
+                                    <th class="p-4 font-semibold w-[15%] cursor-pointer hover:bg-slate-100 hover:text-indigo-600 transition-colors" onclick="handleSort('progress')">Progress <i id="sort-icon-progress" class="fa-solid fa-sort ml-1 opacity-40"></i></th>
+                                    <th class="p-4 font-semibold w-[10%] text-center cursor-default">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="employee-table-body" class="divide-y divide-gray-100">
@@ -287,6 +288,8 @@
                     </button>
                 </div>
             </div>
+            
+            <!-- Area Daftar Progress Checklist -->
             <div class="flex-grow overflow-y-auto bg-slate-50/50 p-6 relative">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div>
@@ -294,7 +297,7 @@
                             <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
                                 <i class="fa-solid fa-folder-open text-indigo-500"></i> Kelengkapan Administratif
                             </h3>
-                            <span class="text-xs font-medium bg-indigo-100 text-indigo-700 px-2 py-1 rounded">Klik item untuk detail</span>
+                            <span class="text-xs font-medium bg-indigo-100 text-indigo-700 px-2 py-1 rounded">Klik item untuk update</span>
                         </div>
                         <div id="admin-list" class="space-y-3"></div>
                     </div>
@@ -309,7 +312,7 @@
                 </div>
             </div>
             
-            <!-- Sidebar Panel Detail Item -->
+            <!-- Sidebar Panel Detail Item (Klik Dari Card) -->
             <div id="item-canvas" class="absolute inset-y-0 right-0 w-full md:w-[450px] bg-white shadow-[-10px_0_30px_rgba(0,0,0,0.1)] border-l border-gray-200 transform translate-x-full canvas-transition flex flex-col z-20 hidden">
                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-slate-50 shrink-0">
                     <div>
@@ -543,6 +546,10 @@
         let currentEditingItemId = null;
         let currentEditingItemType = null; 
         let currentEditTableEmpId = null; 
+        
+        // VARIABEL STATE UNTUK SORTING
+        let sortCol = 'date'; // Default sort berdasarkan tanggal masuk
+        let sortAsc = false; // Tampilkan yang terbaru duluan
 
         // --- SISTEM LOGIN (AUTHENTICATION) ---
         auth.onAuthStateChanged((user) => {
@@ -694,21 +701,15 @@
 
         function getEmployeeTemplates(emp) {
             let reviews = [...baseReviewChecklistTemplate];
-            // Tambahan logik review khusus (misal: OJT untuk Sales)
             if (emp.role && emp.role.toLowerCase() === 'staff' && emp.department && emp.department.toLowerCase() === 'sales marketing') {
                 reviews.unshift({ id: 'review_ojt', label: 'Review OJT', type: 'review', instructions: ["Evaluasi produk"], policies: ["Wajib lulus"] });
             }
             
-            // LOGIKA FILTER KELENGKAPAN ADMINISTRATIF BERDASARKAN SETTING ADMIN
             let filteredAdminItems = adminChecklistTemplate.filter(item => {
-                // Jika array kosong atau tidak ada, berarti item berlaku untuk semua orang
                 const noRoleLimit = !item.targetRoles || item.targetRoles.length === 0;
                 const noDeptLimit = !item.targetDepts || item.targetDepts.length === 0;
-
                 const roleMatch = noRoleLimit || item.targetRoles.includes(emp.role);
                 const deptMatch = noDeptLimit || item.targetDepts.includes(emp.department);
-
-                // Karyawan harus memenuhi kriteria Role DAN Departemen (jika dibatasi)
                 return roleMatch && deptMatch;
             });
 
@@ -728,72 +729,127 @@
             return Math.round((doneCount / allItems.length) * 100);
         }
 
+        // FUNGSI HANDLE KLIK SORTING
+        function handleSort(col) {
+            if (sortCol === col) {
+                sortAsc = !sortAsc; // Balik arah jika kolom yang sama diklik
+            } else {
+                sortCol = col;
+                sortAsc = true; // Set default Ascending untuk kolom baru
+            }
+            renderTable();
+        }
+
         function renderTable() {
             const tbody = document.getElementById('employee-table-body');
             tbody.innerHTML = '';
             
+            // Mengambil Nilai Filter
             const filterName = document.getElementById('filter-name')?.value.toLowerCase() || '';
             const filterRole = document.getElementById('filter-role')?.value || '';
             const filterDept = document.getElementById('filter-dept')?.value || '';
             const filterEntity = document.getElementById('filter-entity')?.value || '';
             const filterProgress = document.getElementById('filter-progress')?.value || '';
-            const filterLimit = document.getElementById('filter-limit')?.value || 'all'; 
+            const filterLimit = document.getElementById('filter-limit')?.value || '25'; 
             
             const filterItemId = document.getElementById('filter-item-id')?.value || '';
             const filterItemStatus = document.getElementById('filter-item-status')?.value || '';
 
-            let totalProgress = 0;
-            let displayCount = 0;
-            let renderCount = 0;
+            // 1. Kalkulasi Data Progress Awal
+            let processedEmps = employees.map(emp => ({
+                ...emp,
+                calculatedProgress: calculateProgress(emp)
+            }));
 
-            employees.forEach(emp => {
-                const progress = calculateProgress(emp);
-                
-                let isMatch = true;
-                if (filterName && !emp.name.toLowerCase().includes(filterName)) isMatch = false;
-                if (filterRole && emp.role !== filterRole) isMatch = false;
-                if (filterDept && emp.department !== filterDept) isMatch = false;
-                if (filterEntity && emp.entity !== filterEntity) isMatch = false;
+            // 2. Terapkan Logika Filter (Saring Data)
+            processedEmps = processedEmps.filter(emp => {
+                if (filterName && !emp.name.toLowerCase().includes(filterName)) return false;
+                if (filterRole && emp.role !== filterRole) return false;
+                if (filterDept && emp.department !== filterDept) return false;
+                if (filterEntity && emp.entity !== filterEntity) return false;
                 
                 if (filterProgress) {
-                    if (filterProgress === 'terminated' && !emp.isTerminated) isMatch = false;
-                    if (filterProgress !== 'terminated' && emp.isTerminated) isMatch = false;
+                    if (filterProgress === 'terminated' && !emp.isTerminated) return false;
+                    if (filterProgress !== 'terminated' && emp.isTerminated) return false;
                     
-                    if (filterProgress === '0-25' && (progress < 0 || progress > 25)) isMatch = false;
-                    if (filterProgress === '26-50' && (progress < 26 || progress > 50)) isMatch = false;
-                    if (filterProgress === '51-75' && (progress < 51 || progress > 75)) isMatch = false;
-                    if (filterProgress === '76-100' && (progress < 76 || progress > 100)) isMatch = false;
+                    if (filterProgress === '0-25' && (emp.calculatedProgress < 0 || emp.calculatedProgress > 25)) return false;
+                    if (filterProgress === '26-50' && (emp.calculatedProgress < 26 || emp.calculatedProgress > 50)) return false;
+                    if (filterProgress === '51-75' && (emp.calculatedProgress < 51 || emp.calculatedProgress > 75)) return false;
+                    if (filterProgress === '76-100' && (emp.calculatedProgress < 76 || emp.calculatedProgress > 100)) return false;
                 }
 
-                // Logika Pengecekan Filter Detail Item
                 if (filterItemId) {
                     const tmpl = getEmployeeTemplates(emp);
                     const allEmpItems = [...tmpl.admin, ...tmpl.reviews];
-                    
-                    // Cek apakah karyawan ini diwajibkan memiliki item tersebut
                     const hasItemTarget = allEmpItems.some(t => t.id === filterItemId);
                     
-                    if (!hasItemTarget) {
-                        isMatch = false; // Sembunyikan jika tidak punya kewajiban item tsb (misal OJT utk Dept Finance)
-                    } else if (filterItemStatus) {
+                    if (!hasItemTarget) return false; 
+                    
+                    if (filterItemStatus) {
                         const itemData = emp.checklist && emp.checklist[filterItemId] ? emp.checklist[filterItemId] : { status: 'NONE' };
-                        
-                        if (filterItemStatus === 'DONE' && itemData.status !== 'DONE') {
-                            isMatch = false; // Ingin lihat yg DONE, tapi ternyata dia belum DONE
-                        } else if (filterItemStatus === 'NOT_DONE' && itemData.status === 'DONE') {
-                            isMatch = false; // Ingin lihat yg BELUM, tapi ternyata dia sudah DONE
-                        }
+                        if (filterItemStatus === 'DONE' && itemData.status !== 'DONE') return false;
+                        if (filterItemStatus === 'NOT_DONE' && itemData.status === 'DONE') return false;
                     }
                 }
+                return true;
+            });
 
-                if (!isMatch) return; 
+            // 3. Terapkan Logika Sorting (Pengurutan Data)
+            processedEmps.sort((a, b) => {
+                let valA, valB;
+                switch (sortCol) {
+                    case 'name': 
+                        valA = (a.name || '').toLowerCase(); 
+                        valB = (b.name || '').toLowerCase(); 
+                        break;
+                    case 'role': 
+                        valA = ((a.role || '') + (a.department || '')).toLowerCase(); 
+                        valB = ((b.role || '') + (b.department || '')).toLowerCase(); 
+                        break;
+                    case 'entity': 
+                        valA = (a.entity || '').toLowerCase(); 
+                        valB = (b.entity || '').toLowerCase(); 
+                        break;
+                    case 'date': 
+                        valA = new Date(a.startDate || 0).getTime(); 
+                        valB = new Date(b.startDate || 0).getTime(); 
+                        break;
+                    case 'progress': 
+                        valA = a.calculatedProgress; 
+                        valB = b.calculatedProgress; 
+                        break;
+                }
 
-                displayCount++;
-                totalProgress += progress;
-                
-                if (filterLimit !== 'all' && renderCount >= parseInt(filterLimit)) return; 
-                renderCount++;
+                if (valA < valB) return sortAsc ? -1 : 1;
+                if (valA > valB) return sortAsc ? 1 : -1;
+                return 0;
+            });
 
+            // Perbarui UI Icon Sorting pada Table Header
+            const cols = ['name', 'role', 'entity', 'date', 'progress'];
+            cols.forEach(c => {
+                const icon = document.getElementById(`sort-icon-${c}`);
+                if (icon) {
+                    if (c === sortCol) {
+                        icon.className = sortAsc ? 'fa-solid fa-sort-up ml-1 text-indigo-600 opacity-100' : 'fa-solid fa-sort-down ml-1 text-indigo-600 opacity-100';
+                    } else {
+                        icon.className = 'fa-solid fa-sort ml-1 opacity-30';
+                    }
+                }
+            });
+
+            // 4. Kalkulasi Statistik Dashboard (Berdasarkan Hasil Filter Sebelum Dilimit)
+            const displayCount = processedEmps.length;
+            const totalProgress = processedEmps.reduce((acc, curr) => acc + curr.calculatedProgress, 0);
+
+            // 5. Terapkan Batas Tampilan (Limit Baris)
+            if (filterLimit !== 'all') {
+                processedEmps = processedEmps.slice(0, parseInt(filterLimit));
+            }
+
+            // 6. Render Data ke HTML Table
+            processedEmps.forEach(emp => {
+                const progress = emp.calculatedProgress;
                 let progColor = progress === 100 ? 'bg-green-500' : (progress < 40 ? 'bg-orange-500' : 'bg-indigo-500');
                 
                 let badgeHtml = '';
@@ -834,7 +890,6 @@
                                 <button onclick="openEditEmployeeModal('${emp.id}')" class="px-3 py-1.5 bg-white border border-slate-300 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-50 transition-all shadow-sm" title="Edit Data">
                                     <i class="fa-solid fa-pen"></i>
                                 </button>
-                                <!-- TOMBOL HAPUS (DELETE) -->
                                 <button onclick="deleteEmployee('${emp.id}', '${emp.name.replace(/'/g, "\\'")}')" class="px-3 py-1.5 bg-white border border-red-200 text-red-600 rounded-lg text-xs font-bold hover:bg-red-50 transition-all shadow-sm" title="Hapus Data">
                                     <i class="fa-solid fa-trash-can"></i>
                                 </button>
@@ -844,10 +899,11 @@
                 `;
             });
 
-            if(displayCount === 0) {
+            if (displayCount === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-sm text-gray-500 font-medium">Tidak ada data karyawan yang sesuai filter.</td></tr>`;
             }
 
+            // Perbarui Counter di Dashboard
             document.getElementById('total-onboarding').innerText = displayCount;
             const avg = displayCount > 0 ? Math.round(totalProgress / displayCount) : 0;
             document.getElementById('avg-progress').innerText = `${avg}%`;
@@ -860,7 +916,9 @@
             document.getElementById('filter-dept').value = '';
             document.getElementById('filter-entity').value = '';
             document.getElementById('filter-progress').value = '';
-            if(document.getElementById('filter-limit')) document.getElementById('filter-limit').value = 'all'; 
+            
+            // Set limit kembali ke nilai 25 secara default
+            if(document.getElementById('filter-limit')) document.getElementById('filter-limit').value = '25'; 
             
             // Reset filter item
             if(document.getElementById('filter-item-id')) document.getElementById('filter-item-id').value = '';
