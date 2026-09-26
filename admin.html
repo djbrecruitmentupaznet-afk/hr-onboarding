@@ -301,7 +301,7 @@
                                 </div>
                                 <div>
                                     <h3 class="text-xl font-bold text-emerald-800 leading-tight">Simulasi Summary</h3>
-                                    <p class="text-sm text-emerald-600 mt-1">Cek item onboarding yang akan didapatkan karyawan.</p>
+                                    <p class="text-sm text-emerald-600 mt-1">Gunakan tombol panah untuk mengatur urutan onboarding.</p>
                                 </div>
                             </div>
 
@@ -766,7 +766,7 @@
             renderSummaryPreview();
         }
 
-        // --- FUNGSI PREVIEW / SIMULASI MAPPING ---
+        // --- FUNGSI PREVIEW / SIMULASI MAPPING & REORDERING ---
         function renderSummaryPreview() {
             const role = document.getElementById('preview-role').value;
             const dept = document.getElementById('preview-dept').value;
@@ -799,12 +799,30 @@
                 return;
             }
 
-            listDiv.innerHTML = filteredItems.map(tmpl => {
+            listDiv.innerHTML = filteredItems.map((tmpl, index) => {
                 const instHtml = `<div class="quill-content text-[11px] text-gray-600">${formatToHtml(tmpl.instructions)}</div>`;
                 const polHtml = `<div class="quill-content text-[11px] text-gray-600">${formatToHtml(tmpl.policies)}</div>`;
                 
+                // Styling dinamis untuk disable tombol jika item paling atas atau paling bawah
+                const upDisabled = index === 0 ? 'opacity-30 cursor-not-allowed text-emerald-300' : 'hover:bg-emerald-100 hover:text-emerald-700 cursor-pointer text-emerald-600';
+                const downDisabled = index === filteredItems.length - 1 ? 'opacity-30 cursor-not-allowed text-emerald-300' : 'hover:bg-emerald-100 hover:text-emerald-700 cursor-pointer text-emerald-600';
+                
+                const upOnClick = index === 0 ? '' : `onclick="moveItemInSummary('${tmpl.id}', 'up')"`;
+                const downOnClick = index === filteredItems.length - 1 ? '' : `onclick="moveItemInSummary('${tmpl.id}', 'down')"`;
+
                 return `
-                    <div class="bg-white border border-emerald-100 rounded-xl p-4 shadow-sm relative">
+                    <div class="bg-white border border-emerald-100 rounded-xl p-4 shadow-sm relative pr-12 transition-all">
+                        
+                        <!-- TOMBOL UP & DOWN -->
+                        <div class="absolute right-2 top-0 bottom-0 flex flex-col justify-center gap-1 border-l border-emerald-50 pl-2">
+                            <button ${upOnClick} class="p-1.5 rounded transition-colors ${upDisabled}" title="Pindah ke Atas">
+                                <i class="fa-solid fa-chevron-up"></i>
+                            </button>
+                            <button ${downOnClick} class="p-1.5 rounded transition-colors ${downDisabled}" title="Pindah ke Bawah">
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </button>
+                        </div>
+
                         <h4 class="font-bold text-emerald-700 text-sm mb-2 border-b border-emerald-50 pb-2"><i class="fa-solid fa-tag text-xs mr-1 opacity-70"></i> ${tmpl.label}</h4>
                         <div class="space-y-3 mt-3">
                             <div>
@@ -819,6 +837,51 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        // FUNGSI BARU UNTUK MERUBAH URUTAN (REORDERING)
+        async function moveItemInSummary(id, direction) {
+            const role = document.getElementById('preview-role').value;
+            const dept = document.getElementById('preview-dept').value;
+
+            // Dapatkan filter items seperti saat rendering
+            const filteredItems = adminChecklistTemplate.filter(item => {
+                const noRoleLimit = !item.targetRoles || item.targetRoles.length === 0;
+                const noDeptLimit = !item.targetDepts || item.targetDepts.length === 0;
+                return (noRoleLimit || item.targetRoles.includes(role)) && (noDeptLimit || item.targetDepts.includes(dept));
+            });
+
+            // Temukan index pada list tersaring
+            const filteredIndex = filteredItems.findIndex(item => item.id === id);
+            if (filteredIndex === -1) return;
+
+            // Tentukan target yang akan dilewati (geser urutan)
+            let targetFilteredIndex = direction === 'up' ? filteredIndex - 1 : filteredIndex + 1;
+            if (targetFilteredIndex < 0 || targetFilteredIndex >= filteredItems.length) return;
+
+            const targetItem = filteredItems[targetFilteredIndex];
+            
+            // Temukan index riil di database global
+            const globalIndex = adminChecklistTemplate.findIndex(item => item.id === id);
+            
+            if (globalIndex !== -1) {
+                // Cabut (remove) item yang akan dipindah
+                const [movedItem] = adminChecklistTemplate.splice(globalIndex, 1);
+                
+                // Cari lokasi/index dari targetItem setelah pencabutan
+                const newTargetGlobalIndex = adminChecklistTemplate.findIndex(item => item.id === targetItem.id);
+                
+                // Jika up, maka letakkan TEPAT SEBELUM posisi targetItem. Jika down, letakkan TEPAT SESUDAH targetItem.
+                const insertIndex = direction === 'up' ? newTargetGlobalIndex : newTargetGlobalIndex + 1;
+                
+                // Masukkan kembali
+                adminChecklistTemplate.splice(insertIndex, 0, movedItem);
+
+                await saveMasterData();
+                renderSummaryPreview();
+                renderAdminTemplates(); 
+                showNotification('Urutan item berhasil diperbarui!');
+            }
         }
 
         async function addMasterRole(e) {
