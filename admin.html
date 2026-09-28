@@ -45,12 +45,17 @@
             min-height: 120px;
             font-size: 0.875rem;
         }
-        /* Style untuk menampilkan HTML dari editor */
-        .quill-content ul { list-style-type: disc !important; padding-left: 1.5rem !important; margin-top: 0.25rem; margin-bottom: 0.5rem; }
-        .quill-content ol { list-style-type: decimal !important; padding-left: 1.5rem !important; margin-top: 0.25rem; margin-bottom: 0.5rem; }
-        .quill-content p { margin-bottom: 0.25rem; }
-        .quill-content strong { font-weight: 700; }
-        .quill-content em { font-style: italic; }
+        
+        /* Style untuk menampilkan HTML dari editor secara akurat (mendukung nested list a,b,c) */
+        .custom-quill-display .ql-editor {
+            padding: 0 !important;
+            min-height: auto !important;
+            font-family: inherit !important;
+            font-size: inherit !important;
+        }
+        .custom-quill-display .ql-editor p { 
+            margin-bottom: 0.25rem; 
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
@@ -536,8 +541,8 @@
             listDiv.innerHTML = '';
 
             adminChecklistTemplate.forEach((tmpl, index) => {
-                const instHtml = `<div class="quill-content text-xs text-gray-700">${formatToHtml(tmpl.instructions)}</div>`;
-                const polHtml = `<div class="quill-content text-xs text-gray-700">${formatToHtml(tmpl.policies)}</div>`;
+                const instHtml = `<div class="custom-quill-display ql-snow text-xs text-gray-700"><div class="ql-editor">${formatToHtml(tmpl.instructions)}</div></div>`;
+                const polHtml = `<div class="custom-quill-display ql-snow text-xs text-gray-700"><div class="ql-editor">${formatToHtml(tmpl.policies)}</div></div>`;
                 
                 listDiv.innerHTML += `
                     <div class="border border-gray-200 rounded-xl p-4 bg-slate-50 relative group">
@@ -800,8 +805,8 @@
             }
 
             listDiv.innerHTML = filteredItems.map((tmpl, index) => {
-                const instHtml = `<div class="quill-content text-[11px] text-gray-600">${formatToHtml(tmpl.instructions)}</div>`;
-                const polHtml = `<div class="quill-content text-[11px] text-gray-600">${formatToHtml(tmpl.policies)}</div>`;
+                const instHtml = `<div class="custom-quill-display ql-snow text-[11px] text-gray-600"><div class="ql-editor">${formatToHtml(tmpl.instructions)}</div></div>`;
+                const polHtml = `<div class="custom-quill-display ql-snow text-[11px] text-gray-600"><div class="ql-editor">${formatToHtml(tmpl.policies)}</div></div>`;
                 
                 // Styling dinamis untuk disable tombol jika item paling atas atau paling bawah
                 const upDisabled = index === 0 ? 'opacity-30 cursor-not-allowed text-emerald-300' : 'hover:bg-emerald-100 hover:text-emerald-700 cursor-pointer text-emerald-600';
